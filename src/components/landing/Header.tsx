@@ -1,0 +1,131 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Menu, X, TrendingUp } from "lucide-react";
+import { Button } from "./button";
+import { LoginModal } from "@/components/landing/LoginModal";
+
+export default function Header() {
+    const [isOpen, setIsOpen] = useState(false);
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    const router = useRouter();
+    const navItems = [
+        { name: "Features", href: "#features" },
+        { name: "Why Us", href: "#why-us" },
+        { name: "Blog", href: "#blog" },
+    ];
+    return (
+        <motion.header
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-vibe-gray-200"
+        >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between items-center h-16">
+                    {/* Logo */}
+                    <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 vibe-gradient rounded-lg flex items-center justify-center">
+                            <TrendingUp className="w-5 h-5 text-white" />
+                        </div>
+                        <span className="text-xl font-bold text-vibe-purple-700">
+                            VibeWealth
+                        </span>
+                    </div>
+                    <nav className="hidden md:flex items-center space-x-8">
+                        {navItems.map((item) => (
+                            <a 
+                            key={item.name}
+                            href={item.href}
+                            className="text-vibe-gray-600 hover:text-vibe-purple-600 transition-colors duration-200 font-medium cursor-pointer"
+                            >
+                                {item.name}
+                            </a>
+                        ))}
+                    </nav>
+                    <div className="hidden md:flex items-center space-x-4">
+                        <Button
+                            variant="ghost"
+                            onClick={() => setIsLoginModalOpen(true)}
+                            className="text-vibe-gray-600 hover:text-vibe-purple-600 hover:bg-vibe-purple-50 cursor-pointer"
+                        >
+                            Login
+                        </Button>
+                        <Button
+                            onClick={() => router.push("/signup")}
+                            className="vibe-gradient hover:opacity-90 text-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+                        >
+                            Get Started
+                        </Button>
+                    </div>
+                    {/* Mobile menu button */}
+                    <button
+                        onClick={() => setIsOpen(!isOpen)}
+                        className="md:hidden p-2 rounded-lg hover:bg-vibe-gray-100 transition-colors cursor-pointer"
+                    >
+                        {isOpen ? (
+                            <X className="w-6 h-6 text-vibe-gray-600" />
+                        ) : (
+                            <Menu className="w-6 h-6 text-vibe-gray-600" />
+                        )}
+                    </button>
+                </div>
+                    {/* Mobile Navigation */}
+                    {isOpen && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="md:hidden border-t border-vibe-gray-200 bg-white"
+                        >
+                            <div className="px-2 pt-2 pb-3 space-y-1">
+                                {navItems.map((item) => (
+                                    <a
+                                    key={item.name}
+                                    href={item.href}
+                                    className="block px-3 py-2 text-vibe-gray-600 hover:text-vibe-purple-600 hover:bg-vibe-purple-50 rounded-lg transition-colors cursor-pointer"
+                                    onClick={() => setIsOpen(false)}
+                                    >
+                                    {item.name}
+                                    </a>
+                                ))}
+                                <div className="flex flex-col space-y-2 px-3 pt-4">
+                                    <Button
+                                        variant="ghost"
+                                        onClick={() => {
+                                            setIsLoginModalOpen(true);
+                                            setIsOpen(false);
+                                        }}
+                                        className="justify-start text-vibe-gray-600 hover:text-vibe-purple-600 hover:bg-vibe-purple-50 cursor-pointer"
+                                    >
+                                        Login
+                                    </Button>
+                                    <Button
+                                        onClick={() => {
+                                            router.push("/signup");
+                                            setIsOpen(false);
+                                        }}
+                                        className="vibe-gradient text-white shadow-lg cursor-pointer"
+                                    >
+                                        Get Started
+                                    </Button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </div>
+            {/* Login Modal */}
+            <LoginModal
+                isOpen={isLoginModalOpen}
+                onClose={() => setIsLoginModalOpen(false)}
+                onSignUpClick={() => {
+                setIsLoginModalOpen(false);
+                router.push("/signup");
+                }}
+            />
+        </motion.header>
+    )
+}
