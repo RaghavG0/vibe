@@ -253,7 +253,7 @@ export function LoginModal({
                 {/* Sign Up Link */}
                 <div className="mt-6 text-center">
                   <p className="text-gray-400">
-                    Don't have an account?{" "}
+                    Don&apos;t have an account?{" "}
                     <button
                       onClick={onSignUpClick}
                       className="text-vibe-purple-400 hover:text-vibe-purple-300 font-medium transition-colors cursor-pointer"

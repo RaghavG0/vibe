@@ -1,7 +1,7 @@
 "use client";
 
 import { ResendEmailButton } from "@/components/landing/ResendEmailButton"
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -127,13 +127,13 @@ export default function ForgotPassword() {
     }, 2000);
   };
 
-  const resendEmail = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      // Show success feedback
-    }, 1000);
-  };
+  // const resendEmail = () => {
+  //   setIsLoading(true);
+  //   setTimeout(() => {
+  //     setIsLoading(false);
+  //     // Show success feedback
+  //   }, 1000);
+  // };
 
   const goToLogin = () => {
     router.push("/");
@@ -256,7 +256,7 @@ export default function ForgotPassword() {
                       Forgot your password?
                     </h1>
                     <p className="text-xl text-white/80 leading-relaxed">
-                      No worries! Enter your email and we'll send you a secure
+                      No worries! Enter your email and we&apos;ll send you a secure
                       link to reset your password.
                     </p>
                   </>
@@ -267,7 +267,7 @@ export default function ForgotPassword() {
                       Check your email
                     </h1>
                     <p className="text-xl text-white/80 leading-relaxed">
-                      We've sent a password reset link to your email. Click the
+                      We&apos;ve sent a password reset link to your email. Click the
                       link to continue with resetting your password.
                     </p>
                   </>
@@ -278,7 +278,7 @@ export default function ForgotPassword() {
                       Create new password
                     </h1>
                     <p className="text-xl text-white/80 leading-relaxed">
-                      Choose a strong password that you haven't used before.
+                      Choose a strong password that you haven&apos;t used before.
                       Your account security is important to us.
                     </p>
                   </>
@@ -350,7 +350,7 @@ export default function ForgotPassword() {
                         Enter your email
                       </h2>
                       <p className="text-gray-400">
-                        We'll send you a link to reset your password
+                        We&apos;ll send you a link to reset your password
                       </p>
                     </div>
 
@@ -410,7 +410,7 @@ export default function ForgotPassword() {
                         Check your email
                       </h2>
                       <p className="text-gray-400 mb-2">
-                        We've sent a password reset link to
+                        We&apos;ve sent a password reset link to
                       </p>
                       <p className="text-vibe-purple-400 font-medium">
                         {email}
@@ -420,11 +420,11 @@ export default function ForgotPassword() {
                     <div className="space-y-4">
                       <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-4">
                         <h3 className="text-sm font-medium text-white mb-2">
-                          What's next?
+                          What&apos;s next?
                         </h3>
                         <ol className="text-sm text-gray-400 space-y-1">
                           <li>1. Check your email inbox (and spam folder)</li>
-                          <li>2. Click the "Reset Password" link</li>
+                          <li>2. Click the &quot;Reset Password&quot; link</li>
                           <li>3. Create your new password</li>
                         </ol>
                       </div>
@@ -602,7 +602,7 @@ export default function ForgotPassword() {
                               <>
                                 <X className="w-4 h-4 text-red-400" />
                                 <span className="text-sm text-red-400">
-                                  Passwords don't match
+                                  Passwords don&apos;t match
                                 </span>
                               </>
                             )}

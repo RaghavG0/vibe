@@ -1,7 +1,8 @@
 // app/components/BlogCarousel.tsx
 "use client"; // Required if used inside a server component (Next.js App Router)
 
-import { useState, useEffect } from "react";
+import Image from "next/image"
+import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   ChevronLeft,
@@ -91,11 +92,11 @@ export function BlogCarousel() {
     desktop: 3,
   };
 
-  const nextSlide = () => {
+ const nextSlide = useCallback(() => {
     setCurrentIndex((prev) =>
       prev + itemsPerView.desktop >= blogPosts.length ? 0 : prev + 1
     );
-  };
+  }, [itemsPerView.desktop]);
 
   const prevSlide = () => {
     setCurrentIndex((prev) =>
@@ -110,7 +111,7 @@ export function BlogCarousel() {
 
     const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
-  }, [isAutoPlaying, currentIndex]);
+  }, [isAutoPlaying, currentIndex, nextSlide]);
 
   return (
     <section
@@ -131,7 +132,7 @@ export function BlogCarousel() {
             Latest from the VibeWealth Blog
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
-            Money tips that don't{" "}
+            Money tips that don&apos;t{" "}
             <span className="text-vibe-purple-700">put you to sleep</span>
           </h2>
           <p className="text-xl text-vibe-gray-600 max-w-3xl mx-auto">
@@ -187,9 +188,11 @@ export function BlogCarousel() {
                   <div className="blog-card group cursor-pointer h-full">
                     {/* Image */}
                     <div className="relative overflow-hidden rounded-t-2xl">
-                      <img
+                      <Image
                         src={post.image}
                         alt={post.title}
+                          width={400}
+                          height={250}
                         className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute top-4 left-4">

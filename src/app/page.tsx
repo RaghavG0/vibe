@@ -7,13 +7,13 @@ import { WhyUs } from "@/components/landing/WhyUs";
 import { BlogCarousel } from "@/components/landing/BlogCarousel";
 import { FinalCTA } from "@/components/landing/FinalCTA";
 import { Footer } from "@/components/landing/Footer";
-import { div } from "framer-motion/client";
+// import { div } from "framer-motion/client";
 import { useEffect, useState } from "react";
 import { LoginModal } from "@/components/landing/LoginModal";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const [isOpen, setIsOpen] = useState(false);
+  // const [isOpen, setIsOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const router = useRouter();
 

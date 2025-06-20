@@ -20,7 +20,7 @@ import { Button } from "@/components/landing/button";
 
 export default function SignUp() {
   const router = useRouter();
-  const [shouldOpenLogin, setShouldOpenLogin] = useState(false);
+  // const [shouldOpenLogin, setShouldOpenLogin] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -127,10 +127,10 @@ export default function SignUp() {
 
     // Dummy registration logic
     setTimeout(() => {
-      alert("Account created successfully! (Demo)");
-      setIsLoading(false);
-      // In a real app, you'd redirect to dashboard or login
-    }, 2000);
+  console.log("Redirecting to onboarding...");
+  setIsLoading(false);
+  router.push("/onboarding?signup=success");
+}, 2000);
   };
 
   const getStrengthColor = () => {
@@ -186,7 +186,7 @@ export default function SignUp() {
             </h1>
 
             <p className="text-xl text-white/80 mb-8 leading-relaxed">
-              Join thousands of Gen Z users who've already transformed their
+              Join thousands of Gen Z users who&apos;ve already transformed their
               relationship with money.
             </p>
 
@@ -479,7 +479,7 @@ export default function SignUp() {
                       <>
                         <X className="w-4 h-4 text-red-400" />
                         <span className="text-sm text-red-400">
-                          Passwords don't match
+                          Passwords don&apos;t match
                         </span>
                       </>
                     )}

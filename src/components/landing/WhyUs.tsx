@@ -75,7 +75,7 @@ export function WhyUs() {
             your money
           </h2>
           <p className="text-xl text-vibe-gray-600 max-w-3xl mx-auto">
-            We're not just another finance app. We're a movement that's changing
+            We&apos;re not just another finance app. We&apos;re a movement that&apos;s changing
             how Gen Z thinks about money.
           </p>
         </motion.div>

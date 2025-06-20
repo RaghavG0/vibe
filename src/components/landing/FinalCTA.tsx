@@ -61,8 +61,8 @@ export function FinalCTA() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-xl text-white/90 mb-12 max-w-3xl mx-auto"
           >
-            Join thousands of Gen Z users who've already transformed their
-            relationship with money. It's time to stop stressing and start
+            Join thousands of Gen Z users who&apos;ve already transformed their
+            relationship with money. It&apos;s time to stop stressing and start
             building wealth.
           </motion.p>
 
