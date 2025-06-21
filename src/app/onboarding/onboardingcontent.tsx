@@ -297,10 +297,10 @@ export default function Onboarding() {
                 <div className="p-8">
                   <div className="text-center mb-8">
                     <h2 className="text-3xl font-bold text-white mb-2">
-                      Let's set up your account
+                      Let\&apos;s set up your account
                     </h2>
                     <p className="text-gray-400">
-                      First things first, let's get your profile set up.
+                      First things first, let\&apos;s get your profile set up.
                     </p>
                   </div>
                   {/* Photo Upload */}
@@ -459,7 +459,7 @@ export default function Onboarding() {
                 <div className="p-8">
                   <div className="text-center mb-8">
                     <h2 className="text-2xl font-bold text-white mb-2">Configure your preferences</h2>
-                    <p className="text-gray-400">Let's configure your preferences.</p>
+                    <p className="text-gray-400">Let\&apos;s configure your preferences.</p>
                   </div>
                   {/* Example Account Display */}
                   <div className="bg-gray-700 rounded-xl p-6 mb-6">
@@ -666,10 +666,10 @@ export default function Onboarding() {
                   </motion.div>
                   <h2 className="text-3xl font-bold text-white mb-4">Welcome to VibeWealth!</h2>
                   <p className="text-gray-400 mb-2">
-                    Hey {formData.firstName}! You're all set to start your financial journey.
+                    Hey {formData.firstName}! You\&apos;re all set to start your financial journey.
                   </p>
                   <p className="text-gray-400 mb-8">
-                    Let's help you achieve your goals and build the wealth you deserve.
+                    Let\&apos;s help you achieve your goals and build the wealth you deserve.
                   </p>
                   <div className="bg-gray-700 rounded-xl p-6 mb-8">
                     <h3 className="text-white font-medium mb-4">Your Journey Starts With:</h3>

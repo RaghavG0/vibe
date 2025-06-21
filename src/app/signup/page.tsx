@@ -88,10 +88,11 @@ export default function SignUp() {
       newErrors.lastName = "Last name is required";
     }
     // Email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (
-      !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email)
+      !emailRegex.test(formData.email)
     ) {
       newErrors.email = "Please enter a valid email address (e.g., user@example.com)";
     }
