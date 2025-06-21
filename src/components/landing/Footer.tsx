@@ -1,13 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useState } from "react";
 import {
   TrendingUp,
   Instagram,
   Twitter,
   Youtube,
   ArrowRight,
+  Bell,
 } from "lucide-react";
+
 
 const socialLinks = [
   {
@@ -28,6 +31,9 @@ const socialLinks = [
 ];
 
 export function Footer() {
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [showToast, setShowToast] = useState(false);
   return (
     <footer className="bg-vibe-gray-900 text-white pt-20 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -40,6 +46,14 @@ export function Footer() {
           transition={{ duration: 0.6 }}
           className="border-b border-vibe-gray-800 pb-12 mb-12"
         >
+          {showToast && (
+            <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50">
+              <div className="flex items-center bg-vibe-gray-800 border border-vibe-purple-500 text-white px-6 py-3 rounded-xl shadow-lg space-x-3">
+                <Bell className="w-5 h-5 text-vibe-purple-400" />
+                <span>Subscribed!</span>
+              </div>
+            </div>
+          )}
           <div className="grid lg:grid-cols-2 gap-8 items-center">
             <div>
               <h3 className="text-2xl sm:text-3xl font-bold mb-4">
@@ -53,9 +67,18 @@ export function Footer() {
 
             {/* Newsletter Form */}
             <form
-              onSubmit={(e) => {
+              onSubmit={e => {
                 e.preventDefault();
-                // 🚀 TODO: Integrate email API (e.g., Mailchimp, SendGrid)
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                  setError("Please enter a valid email address.");
+                  setShowToast(false);
+                  return;
+                }
+                setError("");
+                setShowToast(true);
+                setTimeout(() => setShowToast(false), 2500);
+                setEmail("");
               }}
               className="flex flex-col sm:flex-row gap-4"
             >
@@ -65,13 +88,18 @@ export function Footer() {
                   name="email"
                   id="newsletter-email"
                   placeholder="Enter your email"
-                  required
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
                   className="w-full px-4 py-3 bg-vibe-gray-800 border border-vibe-gray-700 rounded-xl text-white placeholder-vibe-gray-400 focus:outline-none focus:border-vibe-purple-500 transition-colors"
                 />
+                <p className={`text-sm mt-2 min-h-[1.25rem] transition-colors ${error ? "text-red-400" : "text-transparent"}`}>
+                  {error || "placeholder"}
+                </p>
               </div>
               <button
                 type="submit"
-                className="vibe-gradient text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-opacity flex items-center justify-center group"
+                className="vibe-gradient text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-opacity flex items-center justify-center group cursor-pointer h-[52px]" // <-- Add h-[52px]
+                style={{ minHeight: 0, height: "52px" }} // <-- Ensure fixed height
               >
                 Subscribe
                 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />

@@ -11,6 +11,8 @@
   "dependencies": {
     "@sentry/nextjs": "^9.30.0",
     "class-variance-authority": "^0.7.1",
+    "currency-list": "^1.0.8",
+    "currency-symbol-map": "^5.1.0",
     "framer-motion": "^12.18.1",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.516.0",
@@ -18,9 +20,12 @@
     "postcss": "^8.5.6",
     "radix-ui": "^1.4.2",
     "react": "^19.0.0",
+    "react-datepicker": "^8.4.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",
-    "tailwind-merge": "^2.2.1"
+    "react-select": "^5.10.1",
+    "tailwind-merge": "^2.2.1",
+    "world-countries": "^5.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
