@@ -36,7 +36,8 @@ export function LoginModal({
         setIsLoading(false);
         return;
       }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
         setError("Please enter a valid email address.");
         setIsLoading(false);
         return;
@@ -81,6 +82,12 @@ export function LoginModal({
       document.body.style.overflow = "unset";
     };
   }, [isOpen, onClose]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setError("");
+    }
+  }, [isOpen]);
 
   return (
     <AnimatePresence>

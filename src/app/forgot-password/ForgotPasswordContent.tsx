@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/landing/button";
 import { ResendMailButton } from "@/components/landing/ResendEmailButton";
@@ -26,6 +25,8 @@ export default function ForgotPassword() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+  const [isConfirmTyping, setIsConfirmTyping] = useState(false);
+  const [hasShownWeakPasswordWarning, setHasShownWeakPasswordWarning] = useState(false);
 
   // Step logic
   const getInitialStep = () => (token ? 3 : 1);
@@ -37,6 +38,7 @@ export default function ForgotPassword() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showWeakPasswordWarning, setShowWeakPasswordWarning] = useState(false);
 
   // Password requirements
   const passwordRequirements = [
@@ -58,8 +60,6 @@ export default function ForgotPassword() {
   };
 
   const passwordStrength = getPasswordStrength(password);
-  const [showWeakPasswordWarning, setShowWeakPasswordWarning] = useState(false);
-
 
   // Helpers for password strength UI
   const getStrengthColor = () => {
@@ -96,8 +96,9 @@ export default function ForgotPassword() {
   // Step 3: Handle password reset
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrors({});        // Clear errors for "refresh" effect
-    setIsLoading(true);   // Show spinner
+    setShowWeakPasswordWarning(false);
+    setErrors({});
+    setIsLoading(true);
 
     setTimeout(() => {
       const newErrors: Record<string, string> = {};
@@ -121,18 +122,18 @@ export default function ForgotPassword() {
       // If there are any errors, stop here (error will reappear after spinner)
       if (Object.keys(newErrors).length > 0) {
         setIsLoading(false);
+        setIsConfirmTyping(false); // Hide live indicator on error
         return;
       }
 
       // Only show toast if passwords match and password is weak
-      if (passwordStrength.score < 5 && !showWeakPasswordWarning) {
-        toast(
-          "Your password could be stronger. Would you like to improve it or continue?",
-          {
-            icon: "⚠️",
-          }
-        );
+      if (
+        passwordStrength.score < 5 &&
+        !showWeakPasswordWarning &&
+        !hasShownWeakPasswordWarning
+      ) {
         setShowWeakPasswordWarning(true);
+        setHasShownWeakPasswordWarning(true);
         setIsLoading(false);
         return;
       }
@@ -144,6 +145,7 @@ export default function ForgotPassword() {
       }, 1000);
     }, 400); // 400ms for the "refresh" effect
   };
+
   // Go to login page
   const goToLogin = () => {
     router.push("/");
@@ -202,9 +204,31 @@ export default function ForgotPassword() {
     </div>
   );
 
+  // --- Custom persistent toast for weak password ---
+  // Place this just before the main return
+  const WeakPasswordToast = () =>
+    showWeakPasswordWarning ? (
+      <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50">
+        <div className="flex items-center bg-vibe-gray-800 border border-vibe-purple-500 text-white px-6 py-3 rounded-xl shadow-lg space-x-3 max-w-md">
+          <span className="text-xl">⚠️</span>
+          <span className="flex-1">
+            Your password could be stronger. If you still want to use this password, press ‘Update Password’ again.
+          </span>
+          <button
+            onClick={() => setShowWeakPasswordWarning(false)}
+            className="ml-4 text-gray-400 hover:text-white focus:outline-none cursor-pointer"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+    ) : null;
+
   // Main render
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col lg:flex-row">
+      <WeakPasswordToast />
       {/* Left branding panel */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
@@ -537,7 +561,13 @@ export default function ForgotPassword() {
                           <input
                             type={showConfirmPassword ? "text" : "password"}
                             value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            onFocus={() => setIsConfirmTyping(true)}
+                            onBlur={() => setIsConfirmTyping(false)}
+                            onChange={e => {
+                              setConfirmPassword(e.target.value);
+                              setIsConfirmTyping(true);
+                              setErrors(prev => ({ ...prev, confirmPassword: "" }));
+                            }}
                             placeholder="Confirm your new password"
                             className={`w-full pl-10 pr-12 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
                               errors.confirmPassword
@@ -559,8 +589,8 @@ export default function ForgotPassword() {
                             )}
                           </button>
                         </div>
-                        {/* Password Match Indicator */}
-                        {confirmPassword && (
+                        {/* Show live indicator or error, not both */}
+                        {isConfirmTyping && confirmPassword ? (
                           <div className="flex items-center space-x-2">
                             {password === confirmPassword ? (
                               <>
@@ -578,12 +608,9 @@ export default function ForgotPassword() {
                               </>
                             )}
                           </div>
-                        )}
-                        {errors.confirmPassword && (
-                          <p className="text-sm text-red-400">
-                            {errors.confirmPassword}
-                          </p>
-                        )}
+                        ) : errors.confirmPassword ? (
+                          <p className="text-sm text-red-400">{errors.confirmPassword}</p>
+                        ) : null}
                       </div>
                       <Button
                         type="submit"
