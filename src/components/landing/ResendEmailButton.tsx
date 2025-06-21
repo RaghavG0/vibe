@@ -1,41 +1,63 @@
-import { useState, useEffect } from "react";
-import { RefreshCw, Check } from "lucide-react";
-import { Button } from "@/components/landing/button"; // adjust if needed
+"use client";
 
-export function ResendEmailButton() {
+import { useState, useEffect } from "react";
+import { RefreshCw, Check, Mail } from "lucide-react";
+import toast from "react-hot-toast";
+import { Button } from "@/components/landing/button"; // Adjust path if needed
+
+export function ResendMailButton() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
   const [cooldown, setCooldown] = useState(0);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (cooldown > 0) {
-      timer = setInterval(() => {
-        setCooldown((prev) => prev - 1);
-      }, 1000);
-    }
+    if (cooldown === 0) return;
+
+    const timer = setInterval(() => {
+      setCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
     return () => clearInterval(timer);
   }, [cooldown]);
 
-  const handleClick = () => {
+  const handleClick = async () => {
     if (cooldown > 0 || isLoading) return;
 
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+
+    try {
+      // Simulate API call
+      await new Promise((res) => setTimeout(res, 1000));
       setIsSent(true);
       setCooldown(60);
-    }, 1000);
+      toast.success("Email sent successfully!");
+    } catch {
+      toast.error("Failed to send email. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="space-y-2 text-center">
+    <div className="space-y-4 text-center">
+      {/* Resend Button */}
       <Button
         onClick={handleClick}
         disabled={cooldown > 0 || isLoading}
         className={`w-full py-3 rounded-xl font-semibold transition-all duration-300
-          ${isSent && cooldown > 0 ? "bg-vibe-mint-400 text-white" : "border border-gray-700 bg-gray-800 text-white hover:bg-gray-700"}
-          ${cooldown > 0 ? "cursor-not-allowed opacity-80" : "cursor-pointer"}`}
+          ${
+            isSent && cooldown > 0
+              ? "bg-vibe-mint-500 text-white"
+              : "border border-gray-700 bg-gray-800 text-white hover:bg-gray-700"
+          }
+          ${cooldown > 0 ? "cursor-not-allowed opacity-80" : "cursor-pointer"}
+        `}
       >
         {isLoading ? (
           <div className="flex items-center justify-center space-x-2">
@@ -50,17 +72,17 @@ export function ResendEmailButton() {
           </div>
         ) : (
           <div className="flex items-center justify-center space-x-2">
-            <RefreshCw className="w-4 h-4" />
+            <Mail className="w-4 h-4" />
             <span>Resend Email</span>
           </div>
         )}
       </Button>
 
-      {/* Status message below button */}
+      {/* Cooldown Message */}
       <p className="text-sm text-gray-400">
         {cooldown > 0
-          ? `Didn't get the mail? You can resend in ${cooldown}s.`
-          : `Didn't get the mail? Try resending now.`}
+          ? `You can resend email in ${cooldown}s.`
+          : `Didn't get it? Resend the email now.`}
       </p>
     </div>
   );

@@ -11,6 +11,7 @@ export function Hero() {
   const router = useRouter();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
+  // Animation variants for parent and child elements
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -34,6 +35,7 @@ export function Hero() {
     },
   };
 
+  // Floating icons around the hero section
   const floatingIcons = [
     { Icon: TrendingUp, delay: 0, position: "top-20 left-20" },
     { Icon: DollarSign, delay: 2, position: "top-40 right-32" },
@@ -42,7 +44,7 @@ export function Hero() {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white">
-      {/* Background Pattern */}
+      {/* Decorative SVG background pattern */}
       <div
         className="absolute inset-0 opacity-40"
         style={{
@@ -50,24 +52,15 @@ export function Hero() {
           backgroundSize: "200px 200px",
         }}
       />
-
       <div className="absolute inset-0 bg-white/60" />
 
-      {/* Floating Icons */}
+      {/* Floating animated icons */}
       {floatingIcons.map(({ Icon, delay, position }, index) => (
         <motion.div
           key={index}
           className={`absolute hidden lg:block ${position}`}
-          animate={{
-            y: [0, -20, 0],
-            rotate: [0, 5, -5, 0],
-          }}
-          transition={{
-            duration: 4,
-            delay,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+          animate={{ y: [0, -20, 0], rotate: [0, 5, -5, 0] }}
+          transition={{ duration: 4, delay, repeat: Infinity, ease: "easeInOut" }}
         >
           <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30">
             <Icon className="w-6 h-6 text-vibe-purple-600" />
@@ -75,7 +68,7 @@ export function Hero() {
         </motion.div>
       ))}
 
-      {/* Gradient Orbs */}
+      {/* Animated gradient blobs */}
       <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-vibe-purple-300/20 rounded-full blur-3xl animate-pulse-slow" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-vibe-blue-300/20 rounded-full blur-3xl animate-pulse-slow delay-1000" />
       <div className="absolute top-1/2 left-1/2 w-80 h-80 bg-vibe-mint-300/20 rounded-full blur-3xl animate-pulse-slow delay-2000" />
@@ -87,12 +80,11 @@ export function Hero() {
           animate="visible"
           className="grid lg:grid-cols-2 gap-12 items-center"
         >
-          {/* Left Section */}
+          {/* Text content */}
           <div className="text-center lg:text-left">
             <motion.div variants={itemVariants}>
               <span className="inline-flex items-center px-4 py-2 rounded-full bg-vibe-gradient/10 border border-vibe-purple-200 text-vibe-purple-700 text-sm font-medium mb-6">
-                <Sparkles className="w-4 h-4 mr-2" />
-                AI-Powered Finance for Gen Z
+                <Sparkles className="w-4 h-4 mr-2" /> AI-Powered Finance for Gen Z
               </span>
             </motion.div>
 
@@ -100,19 +92,17 @@ export function Hero() {
               variants={itemVariants}
               className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6"
             >
-              Master Your <span className="text-vibe-purple-700">Finances</span>{" "}
-              with Ease
+              Master Your <span className="text-vibe-purple-700">Finances</span> with Ease
             </motion.h1>
 
             <motion.p
               variants={itemVariants}
               className="text-xl text-vibe-gray-600 mb-8 max-w-2xl mx-auto lg:mx-0"
             >
-              AI-powered finance tracker, budget planner & dream visualizer
-              designed specifically for Gen Z. Turn your money goals into
-              reality with style.
+              AI-powered finance tracker, budget planner & dream visualizer designed specifically for Gen Z.
             </motion.p>
 
+            {/* Call-to-action buttons */}
             <motion.div
               variants={itemVariants}
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
@@ -120,7 +110,7 @@ export function Hero() {
               <Button
                 size="lg"
                 onClick={() => router.push("/signup")}
-                className="vibe-gradient hover:opacity-90 text-white shadow-xl hover:shadow-2xl transition-all duration-300 group cursor-pointer"
+                className="vibe-gradient hover:opacity-90 text-white shadow-xl hover:shadow-2xl group cursor-pointer"
               >
                 Get Started Free
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -142,63 +132,47 @@ export function Hero() {
               className="mt-8 flex items-center justify-center lg:justify-start space-x-6 text-sm text-vibe-gray-500"
             >
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-vibe-mint-500 rounded-full mr-2" />
-                Forever Free Plan
+                <div className="w-2 h-2 bg-vibe-mint-500 rounded-full mr-2" /> Forever Free Plan
               </div>
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-vibe-blue-500 rounded-full mr-2" />
-                24/7 AI Support
+                <div className="w-2 h-2 bg-vibe-blue-500 rounded-full mr-2" /> 24/7 AI Support
               </div>
             </motion.div>
           </div>
 
-          {/* Right Visual */}
-          <motion.div
-            variants={itemVariants}
-            className="relative flex items-center justify-center"
-          >
+          {/* Visual card preview */}
+          <motion.div variants={itemVariants} className="relative flex items-center justify-center">
             <div className="relative w-full max-w-lg">
+              {/* Main finance card */}
               <div className="bg-white rounded-3xl shadow-2xl p-8 border border-vibe-gray-100">
                 <div className="text-center">
                   <div className="w-16 h-16 vibe-gradient rounded-2xl mx-auto mb-4 flex items-center justify-center">
                     <TrendingUp className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-vibe-gray-800 mb-2">
-                    Monthly Budget
-                  </h3>
-                  <p className="text-3xl font-bold text-vibe-purple-700 mb-4">
-                    $2,847
-                  </p>
+                  <h3 className="text-xl font-bold text-vibe-gray-800 mb-2">Monthly Budget</h3>
+                  <p className="text-3xl font-bold text-vibe-purple-700 mb-4">$2,847</p>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-vibe-gray-600">
-                        Saved this month
-                      </span>
-                      <span className="font-semibold text-vibe-mint-600">
-                        +$421
-                      </span>
+                      <span className="text-vibe-gray-600">Saved this month</span>
+                      <span className="font-semibold text-vibe-mint-600">+$421</span>
                     </div>
                     <div className="w-full bg-vibe-gray-200 rounded-full h-2">
-                      <div className="vibe-gradient h-2 rounded-full w-3/4"></div>
+                      <div className="vibe-gradient h-2 rounded-full w-3/4" />
                     </div>
                   </div>
                 </div>
               </div>
 
+              {/* Top-right badge */}
               <div className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-lg p-4 border border-vibe-gray-100">
                 <div className="text-center">
-                  <div className="text-lg font-bold text-vibe-purple-600">
-                    🎯
-                  </div>
-                  <div className="text-xs text-vibe-gray-600 mt-1">
-                    Dream Goal
-                  </div>
-                  <div className="text-sm font-bold text-vibe-gray-800">
-                    78% Complete
-                  </div>
+                  <div className="text-lg font-bold text-vibe-purple-600">🎯</div>
+                  <div className="text-xs text-vibe-gray-600 mt-1">Dream Goal</div>
+                  <div className="text-sm font-bold text-vibe-gray-800">78% Complete</div>
                 </div>
               </div>
 
+              {/* Bottom-left tip */}
               <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-lg p-4 border border-vibe-gray-100">
                 <div className="flex items-center space-x-2">
                   <div className="w-8 h-8 bg-vibe-mint-100 rounded-lg flex items-center justify-center">
@@ -206,9 +180,7 @@ export function Hero() {
                   </div>
                   <div>
                     <div className="text-xs text-vibe-gray-600">AI Tip</div>
-                    <div className="text-sm font-bold text-vibe-gray-800">
-                      Save $50 more
-                    </div>
+                    <div className="text-sm font-bold text-vibe-gray-800">Save $50 more</div>
                   </div>
                 </div>
               </div>
@@ -217,6 +189,7 @@ export function Hero() {
         </motion.div>
       </div>
 
+      {/* Auth Modal */}
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}

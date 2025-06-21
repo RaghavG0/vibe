@@ -1,36 +1,25 @@
 'use client';
 
 import { motion } from "framer-motion";
-import { Shield, Users, Award, Zap, Star, CheckCircle } from "lucide-react";
-import { AnimatedCounter } from "./AnimatedCounter"; // Ensure this file exists and is correct
+import {
+  Shield,
+  Users,
+  Award,
+  Zap,
+  Star,
+  CheckCircle,
+} from "lucide-react";
+import { AnimatedCounter } from "./AnimatedCounter";
 
+// Static stats data
 const stats = [
-  {
-    number: "50K+",
-    label: "Gen Z Users",
-    icon: Users,
-    color: "vibe-purple",
-  },
-  {
-    number: "98%",
-    label: "Satisfaction Rate",
-    icon: Star,
-    color: "vibe-blue",
-  },
-  {
-    number: "$2M+",
-    label: "Money Saved",
-    icon: Award,
-    color: "vibe-mint",
-  },
-  {
-    number: "24/7",
-    label: "AI Support",
-    icon: Zap,
-    color: "vibe-purple",
-  },
+  { number: "50K+", label: "Gen Z Users", icon: Users, color: "vibe-purple" },
+  { number: "98%", label: "Satisfaction Rate", icon: Star, color: "vibe-blue" },
+  { number: "$2M+", label: "Money Saved", icon: Award, color: "vibe-mint" },
+  { number: "24/7", label: "AI Support", icon: Zap, color: "vibe-purple" },
 ];
 
+// USPs / Differentiators
 const differentiators = [
   {
     title: "Built for Gen Z",
@@ -58,7 +47,7 @@ export function WhyUs() {
   return (
     <section id="why-us" className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+        {/* Section heading */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -70,17 +59,17 @@ export function WhyUs() {
             <Shield className="w-4 h-4 mr-2" />
             Why Choose VibeWealth?
           </div>
+
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
-            The <span className="text-vibe-purple-700">smarter choice</span> for
-            your money
+            The <span className="text-vibe-purple-700">smarter choice</span> for your money
           </h2>
+
           <p className="text-xl text-vibe-gray-600 max-w-3xl mx-auto">
-            We&apos;re not just another finance app. We&apos;re a movement that&apos;s changing
-            how Gen Z thinks about money.
+            We&apos;re not just another finance app. We&apos;re a movement that&apos;s changing how Gen Z thinks about money.
           </p>
         </motion.div>
 
-        {/* Stats Grid */}
+        {/* Stats section */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -90,6 +79,7 @@ export function WhyUs() {
         >
           {stats.map((stat, index) => {
             const Icon = stat.icon;
+
             return (
               <motion.div
                 key={index}
@@ -99,14 +89,18 @@ export function WhyUs() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="text-center group"
               >
+                {/* Icon box */}
                 <div
                   className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-r from-${stat.color}-500 to-${stat.color}-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
                 >
                   <Icon className="w-8 h-8 text-white" />
                 </div>
+
+                {/* Animated number */}
                 <div className="mb-2">
                   <AnimatedCounter value={stat.number} />
                 </div>
+
                 <div className="text-vibe-gray-600 font-medium">
                   {stat.label}
                 </div>
@@ -124,8 +118,7 @@ export function WhyUs() {
           className="mb-20"
         >
           <h3 className="text-2xl sm:text-3xl font-bold text-center mb-12">
-            What makes us{" "}
-            <span className="text-vibe-purple-700">different</span>
+            What makes us <span className="text-vibe-purple-700">different</span>
           </h3>
 
           <div className="grid md:grid-cols-2 gap-8">

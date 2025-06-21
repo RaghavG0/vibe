@@ -1,7 +1,8 @@
+// src/components/features.tsx
 "use client";
 
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation"; // <-- Next.js routing
+import { useRouter } from "next/navigation";
 import {
   Target,
   Bot,
@@ -12,13 +13,13 @@ import {
   Sparkles,
 } from "lucide-react";
 
+// Feature data – could be moved to @/data/features.ts for modularity
 const features = [
   {
     icon: Target,
     title: "Dream Tracker",
     description:
       "Visualize and track your biggest financial goals with interactive progress bars and milestone celebrations.",
-    color: "vibe-purple",
     gradient: "from-vibe-purple-500 to-vibe-purple-600",
   },
   {
@@ -26,7 +27,6 @@ const features = [
     title: "AI Chatbot",
     description:
       "Get personalized financial advice, spending insights, and budget tips from our smart AI assistant.",
-    color: "vibe-blue",
     gradient: "from-vibe-blue-500 to-vibe-blue-600",
   },
   {
@@ -34,7 +34,6 @@ const features = [
     title: "Smart Budget Planner",
     description:
       "Create intelligent budgets that adapt to your lifestyle and automatically optimize your spending.",
-    color: "vibe-mint",
     gradient: "from-vibe-mint-500 to-vibe-mint-600",
   },
   {
@@ -42,7 +41,6 @@ const features = [
     title: "Meme-style Content",
     description:
       "Learn finance through Gen Z-friendly content, memes, and interactive challenges that make money fun.",
-    color: "vibe-purple",
     gradient: "from-vibe-purple-400 to-vibe-blue-500",
   },
   {
@@ -50,7 +48,6 @@ const features = [
     title: "Transaction Breakdown",
     description:
       "Beautiful charts and insights that show exactly where your money goes with smart categorization.",
-    color: "vibe-blue",
     gradient: "from-vibe-blue-400 to-vibe-mint-500",
   },
   {
@@ -58,26 +55,23 @@ const features = [
     title: "Smart Nudging",
     description:
       "Gentle reminders and alerts that help you stay on track without being annoying or overwhelming.",
-    color: "vibe-mint",
     gradient: "from-vibe-mint-400 to-vibe-purple-500",
   },
 ];
 
-export function Features() {
-  const router = useRouter();
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        delayChildren: 0.3,
-        staggerChildren: 0.1,
-      },
+// Framer Motion animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      delayChildren: 0.3,
+      staggerChildren: 0.1,
     },
-  };
+  },
+};
 
-  const itemVariants = {
+const itemVariants = {
   hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
@@ -89,12 +83,16 @@ export function Features() {
   },
 };
 
+export function Features() {
+  const router = useRouter();
+
   return (
     <section
       id="features"
       className="py-20 bg-gradient-to-b from-white to-vibe-gray-50"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -116,6 +114,7 @@ export function Features() {
           </p>
         </motion.div>
 
+        {/* Feature cards */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -132,22 +131,21 @@ export function Features() {
                 whileHover={{ scale: 1.05 }}
                 className="group bg-white rounded-2xl p-8 shadow-lg border border-vibe-gray-100 hover:shadow-xl hover:border-vibe-purple-200 transition-all duration-300 relative overflow-hidden"
               >
-                {/* Background gradient on hover */}
+                {/* Hover background effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-transparent to-vibe-gray-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                 <div className="relative z-10">
-                  {/* Icon */}
+                  {/* Feature icon */}
                   <div
                     className={`w-14 h-14 rounded-xl bg-gradient-to-r ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
                   >
                     <Icon className="w-7 h-7 text-white" />
                   </div>
 
-                  {/* Content */}
+                  {/* Feature content */}
                   <h3 className="text-xl font-bold text-vibe-gray-800 mb-3 group-hover:text-vibe-purple-700 transition-colors">
                     {feature.title}
                   </h3>
-
                   <p className="text-vibe-gray-600 leading-relaxed">
                     {feature.description}
                   </p>
@@ -157,7 +155,7 @@ export function Features() {
           })}
         </motion.div>
 
-        {/* Bottom CTA */}
+        {/* CTA button */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

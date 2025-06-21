@@ -1,36 +1,34 @@
 "use client";
 
-import { ResendEmailButton } from "@/components/landing/ResendEmailButton"
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import {
-  ArrowLeft,
+  RefreshCw,
+  Check,
   Mail,
   Lock,
   Eye,
   EyeOff,
-  Check,
-  X,
-  TrendingUp,
-  RefreshCw,
   CheckCircle,
+  ArrowLeft,
   ArrowRight,
+  TrendingUp,
+  X,
 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/landing/button";
+import { ResendMailButton } from "@/components/landing/ResendEmailButton";
 
 export default function ForgotPassword() {
+  // Hooks and state
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
-  // Determine initial step based on URL parameters
-  const getInitialStep = () => {
-    if (token) return 3; // If token is present, go to reset password step
-    return 1;
-  };
-
+  // Step logic
+  const getInitialStep = () => (token ? 3 : 1);
   const [currentStep, setCurrentStep] = useState(getInitialStep());
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,19 +38,18 @@ export default function ForgotPassword() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Password strength validation
+  // Password requirements
   const passwordRequirements = [
     { regex: /.{8,}/, text: "Minimum 8 characters" },
     { regex: /[a-z]/, text: "One lowercase letter" },
     { regex: /[A-Z]/, text: "One uppercase letter" },
     { regex: /\d/, text: "One number (0-9)" },
-    { regex: /[!@#$%^&*(),.?":{}|<>]/, text: "One special character" },
+    { regex: /[!@#$%^&*(),.?\":{}|<>]/, text: "One special character" },
   ];
 
+  // Password strength calculation
   const getPasswordStrength = (password: string) => {
-    const passed = passwordRequirements.filter((req) =>
-      req.regex.test(password),
-    );
+    const passed = passwordRequirements.filter((req) => req.regex.test(password));
     return {
       score: passed.length,
       total: passwordRequirements.length,
@@ -61,7 +58,10 @@ export default function ForgotPassword() {
   };
 
   const passwordStrength = getPasswordStrength(password);
+  const [showWeakPasswordWarning, setShowWeakPasswordWarning] = useState(false);
 
+
+  // Helpers for password strength UI
   const getStrengthColor = () => {
     if (passwordStrength.percentage < 40) return "bg-red-500";
     if (passwordStrength.percentage < 80) return "bg-yellow-500";
@@ -74,96 +74,95 @@ export default function ForgotPassword() {
     return "Strong";
   };
 
-  // Step 1: Email submission
+  // Step 1: Handle email submit
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-
     if (!email.trim()) {
       setErrors({ email: "Email is required" });
       return;
     }
-
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setErrors({ email: "Please enter a valid email address" });
       return;
     }
-
     setIsLoading(true);
-
-    // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
       setCurrentStep(2);
     }, 1500);
   };
 
-  // Step 3: Password reset
+  // Step 3: Handle password reset
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newErrors: Record<string, string> = {};
+    setErrors({});        // Clear errors for "refresh" effect
+    setIsLoading(true);   // Show spinner
 
-    if (!password) {
-      newErrors.password = "Password is required";
-    } else if (passwordStrength.score < 5) {
-      newErrors.password = "Please meet all password requirements";
-    }
-
-    if (!confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password";
-    } else if (password !== confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
-
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
-
-    setIsLoading(true);
-
-    // Simulate API call
     setTimeout(() => {
-      setIsLoading(false);
-      setCurrentStep(4);
-    }, 2000);
+      const newErrors: Record<string, string> = {};
+
+      // Validate password
+      if (!password) {
+        newErrors.password = "Password is required";
+      } else if (password.length < 8) {
+        newErrors.password = "Password must be at least 8 characters";
+      }
+
+      // Validate confirm password
+      if (!confirmPassword) {
+        newErrors.confirmPassword = "Please confirm your password";
+      } else if (password !== confirmPassword) {
+        newErrors.confirmPassword = "Passwords do not match";
+      }
+
+      setErrors(newErrors);
+
+      // If there are any errors, stop here (error will reappear after spinner)
+      if (Object.keys(newErrors).length > 0) {
+        setIsLoading(false);
+        return;
+      }
+
+      // Only show toast if passwords match and password is weak
+      if (passwordStrength.score < 5 && !showWeakPasswordWarning) {
+        toast(
+          "Your password could be stronger. Would you like to improve it or continue?",
+          {
+            icon: "⚠️",
+          }
+        );
+        setShowWeakPasswordWarning(true);
+        setIsLoading(false);
+        return;
+      }
+
+      // Success: proceed to next step
+      setTimeout(() => {
+        setIsLoading(false);
+        setCurrentStep(4);
+      }, 1000);
+    }, 400); // 400ms for the "refresh" effect
   };
-
-  // const resendEmail = () => {
-  //   setIsLoading(true);
-  //   setTimeout(() => {
-  //     setIsLoading(false);
-  //     // Show success feedback
-  //   }, 1000);
-  // };
-
+  // Go to login page
   const goToLogin = () => {
     router.push("/");
     localStorage.setItem("openLogin", "true");
   };
 
-  // Step progress indicators
+  // Steps for indicator
   const steps = [
-    {
-      number: 1,
-      title: "Enter Email",
-      description: "We'll send you a reset link",
-    },
-    {
-      number: 2,
-      title: "Check Email",
-      description: "Click the link we sent you",
-    },
-    {
-      number: 3,
-      title: "New Password",
-      description: "Create a secure password",
-    },
+    { number: 1, title: "Enter Email", description: "We'll send you a reset link" },
+    { number: 2, title: "Check Email", description: "Click the link we sent you" },
+    { number: 3, title: "New Password", description: "Create a secure password" },
     { number: 4, title: "Complete", description: "You're all set!" },
   ];
 
+  // Step indicator component
   const StepIndicator = () => (
     <div className="flex items-start justify-center mb-8 px-4">
       {steps.map((step, index) => (
-        <div key={step.number} className="flex items-start">
+        <div key={step.number} className="relative flex items-start">
           <div className="flex flex-col items-center px-2 sm:px-4 md:px-6">
             <div className="relative flex items-center">
               <div
@@ -171,24 +170,21 @@ export default function ForgotPassword() {
                   currentStep > step.number
                     ? "bg-vibe-mint-500 text-white"
                     : currentStep === step.number
-                      ? "vibe-gradient text-white"
-                      : "bg-gray-800 text-gray-400"
+                    ? "vibe-gradient text-white"
+                    : "bg-gray-800 text-gray-400"
                 }`}
               >
-                {currentStep > step.number ? (
-                  <Check className="w-5 h-5" />
-                ) : (
-                  step.number
-                )}
+                {currentStep > step.number ? <Check className="w-5 h-5" /> : step.number}
               </div>
+              {/* Connecting line */}
               {index < steps.length - 1 && (
-                <div
-                  className={`absolute left-10 top-1/2 -translate-y-1/2 w-8 sm:w-12 md:w-16 lg:w-20 h-0.5 transition-all duration-300 ${
-                    currentStep > step.number
-                      ? "bg-vibe-mint-500"
-                      : "bg-gray-700"
-                  }`}
-                />
+                <div className="absolute left-full top-1/2 transform -translate-y-1/2 w-16 sm:w-20 md:w-24 lg:w-28 h-0.5">
+                  <div
+                    className={`w-full h-0.5 transition-all duration-300 ${
+                      currentStep > step.number ? "bg-vibe-mint-500" : "bg-gray-700"
+                    }`}
+                  />
+                </div>
               )}
             </div>
             <div className="mt-2 text-center min-w-[60px] sm:min-w-[80px]">
@@ -206,16 +202,17 @@ export default function ForgotPassword() {
     </div>
   );
 
+  // Main render
   return (
-    <div className="min-h-screen bg-gray-900 flex">
-      {/* Left Side - Branding */}
+    <div className="min-h-screen bg-gray-900 flex flex-col lg:flex-row">
+      {/* Left branding panel */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
         className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-vibe-purple-900 via-vibe-blue-900 to-vibe-mint-900 relative overflow-hidden"
       >
-        {/* Background Pattern */}
+        {/* Background pattern */}
         <div className="absolute inset-0 opacity-20">
           <div
             className="w-full h-full"
@@ -225,8 +222,7 @@ export default function ForgotPassword() {
             }}
           />
         </div>
-
-        {/* Content */}
+        {/* Branding content */}
         <div className="relative z-10 flex flex-col justify-center items-center text-center px-12 py-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -240,8 +236,7 @@ export default function ForgotPassword() {
               </div>
               <span className="text-2xl font-bold text-white">VibeWealth</span>
             </div>
-
-            {/* Dynamic content based on step */}
+            {/* Animated step description */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentStep}
@@ -300,18 +295,15 @@ export default function ForgotPassword() {
         </div>
       </motion.div>
 
-      {/* Right Side - Form */}
+      {/* Right side - Form */}
       <div className="w-full lg:w-1/2 flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-800">
-          <Link
-            href="/"
-            className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
-          >
+        {/* Mobile header */}
+        <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-2 px-4 py-4 border-b border-gray-800 text-sm text-gray-400 text-center sm:text-left">
+          <Link href="/" className="flex items-center space-x-2 hover:text-white">
             <ArrowLeft className="w-5 h-5" />
             <span>Back to home</span>
           </Link>
-          <div className="flex items-center space-x-4 text-sm text-gray-400">
+          <div className="flex items-center space-x-2">
             <span>Remember your password?</span>
             <button
               onClick={goToLogin}
@@ -322,18 +314,17 @@ export default function ForgotPassword() {
           </div>
         </div>
 
-        {/* Form Content */}
-        <div className="flex-1 flex items-center justify-center p-6">
+        {/* Form content */}
+        <div className="flex-1 flex items-center justify-center px-4 py-6 min-h-[calc(100vh-64px)]">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="w-full max-w-md"
+            className="w-full max-w-md mx-auto"
           >
-            {/* Step Indicator */}
             <StepIndicator />
 
-            {/* Form Content */}
+            {/* Animated form steps */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentStep}
@@ -353,8 +344,7 @@ export default function ForgotPassword() {
                         We&apos;ll send you a link to reset your password
                       </p>
                     </div>
-
-                    <form onSubmit={handleEmailSubmit} className="space-y-6">
+                    <form onSubmit={handleEmailSubmit} className="space-y-6" noValidate>
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-300">
                           Email Address
@@ -377,7 +367,6 @@ export default function ForgotPassword() {
                           <p className="text-sm text-red-400">{errors.email}</p>
                         )}
                       </div>
-
                       <Button
                         type="submit"
                         disabled={isLoading}
@@ -412,11 +401,8 @@ export default function ForgotPassword() {
                       <p className="text-gray-400 mb-2">
                         We&apos;ve sent a password reset link to
                       </p>
-                      <p className="text-vibe-purple-400 font-medium">
-                        {email}
-                      </p>
+                      <p className="text-vibe-purple-400 font-medium">{email}</p>
                     </div>
-
                     <div className="space-y-4">
                       <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-4">
                         <h3 className="text-sm font-medium text-white mb-2">
@@ -428,11 +414,9 @@ export default function ForgotPassword() {
                           <li>3. Create your new password</li>
                         </ol>
                       </div>
-
                       <div className="flex flex-col space-y-3">
-                        <ResendEmailButton />
-
-                        {/* For demo purposes - button to simulate email click */}
+                        <ResendMailButton />
+                        {/* Demo button to simulate email click */}
                         <Button
                           onClick={() => setCurrentStep(3)}
                           className="w-full bg-gray-700 hover:bg-gray-600 text-white text-sm cursor-pointer"
@@ -452,11 +436,9 @@ export default function ForgotPassword() {
                         Create new password
                       </h2>
                       <p className="text-gray-400">
-                        Your new password must be different from your previous
-                        password
+                        Your new password must be different from your previous password
                       </p>
                     </div>
-
                     <form onSubmit={handlePasswordReset} className="space-y-6">
                       {/* New Password */}
                       <div className="space-y-2">
@@ -488,8 +470,7 @@ export default function ForgotPassword() {
                             )}
                           </button>
                         </div>
-
-                        {/* Password Strength */}
+                        {/* Password Strength Meter */}
                         {password && (
                           <div className="space-y-2">
                             <div className="flex items-center justify-between">
@@ -501,8 +482,8 @@ export default function ForgotPassword() {
                                   passwordStrength.percentage < 40
                                     ? "text-red-400"
                                     : passwordStrength.percentage < 80
-                                      ? "text-yellow-400"
-                                      : "text-green-400"
+                                    ? "text-yellow-400"
+                                    : "text-green-400"
                                 }`}
                               >
                                 {getStrengthText()}
@@ -531,9 +512,7 @@ export default function ForgotPassword() {
                                     )}
                                     <span
                                       className={`text-xs ${
-                                        isMet
-                                          ? "text-green-400"
-                                          : "text-gray-400"
+                                        isMet ? "text-green-400" : "text-gray-400"
                                       }`}
                                     >
                                       {req.text}
@@ -544,14 +523,10 @@ export default function ForgotPassword() {
                             </div>
                           </div>
                         )}
-
                         {errors.password && (
-                          <p className="text-sm text-red-400">
-                            {errors.password}
-                          </p>
+                          <p className="text-sm text-red-400">{errors.password}</p>
                         )}
                       </div>
-
                       {/* Confirm Password */}
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-300">
@@ -567,17 +542,14 @@ export default function ForgotPassword() {
                             className={`w-full pl-10 pr-12 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
                               errors.confirmPassword
                                 ? "border-red-500 focus:ring-red-500"
-                                : confirmPassword &&
-                                    password === confirmPassword
-                                  ? "border-green-500 focus:ring-green-500"
-                                  : "border-gray-700 focus:ring-vibe-purple-500 focus:border-transparent"
+                                : confirmPassword && password === confirmPassword
+                                ? "border-green-500 focus:ring-green-500"
+                                : "border-gray-700 focus:ring-vibe-purple-500 focus:border-transparent"
                             }`}
                           />
                           <button
                             type="button"
-                            onClick={() =>
-                              setShowConfirmPassword(!showConfirmPassword)
-                            }
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors cursor-pointer"
                           >
                             {showConfirmPassword ? (
@@ -587,7 +559,6 @@ export default function ForgotPassword() {
                             )}
                           </button>
                         </div>
-
                         {/* Password Match Indicator */}
                         {confirmPassword && (
                           <div className="flex items-center space-x-2">
@@ -608,14 +579,12 @@ export default function ForgotPassword() {
                             )}
                           </div>
                         )}
-
                         {errors.confirmPassword && (
                           <p className="text-sm text-red-400">
                             {errors.confirmPassword}
                           </p>
                         )}
                       </div>
-
                       <Button
                         type="submit"
                         disabled={isLoading}
@@ -649,15 +618,12 @@ export default function ForgotPassword() {
                     >
                       <CheckCircle className="w-10 h-10 text-vibe-mint-400" />
                     </motion.div>
-
                     <h2 className="text-2xl font-bold text-white mb-2">
                       Password updated successfully!
                     </h2>
                     <p className="text-gray-400 mb-8">
-                      Your password has been changed. You can now sign in with
-                      your new password.
+                      Your password has been changed. You can now sign in with your new password.
                     </p>
-
                     <div className="space-y-4">
                       <Button
                         onClick={goToLogin}
@@ -668,7 +634,6 @@ export default function ForgotPassword() {
                           <ArrowRight className="w-5 h-5" />
                         </div>
                       </Button>
-
                       <Link
                         href="/"
                         className="block w-full text-center py-3 text-gray-400 hover:text-white transition-colors cursor-pointer"

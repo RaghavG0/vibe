@@ -1,6 +1,5 @@
 "use client";
 
-// import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   TrendingUp,
@@ -16,8 +15,16 @@ const socialLinks = [
     href: "https://instagram.com/vibewealth",
     label: "Instagram",
   },
-  { icon: Twitter, href: "https://twitter.com/vibewealth", label: "Twitter" },
-  { icon: Youtube, href: "https://youtube.com/vibewealth", label: "YouTube" },
+  {
+    icon: Twitter,
+    href: "https://twitter.com/vibewealth",
+    label: "Twitter",
+  },
+  {
+    icon: Youtube,
+    href: "https://youtube.com/vibewealth",
+    label: "YouTube",
+  },
 ];
 
 export function Footer() {
@@ -43,19 +50,33 @@ export function Footer() {
                 new features. No spam, just good vibes and better finances.
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-4">
+
+            {/* Newsletter Form */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                // 🚀 TODO: Integrate email API (e.g., Mailchimp, SendGrid)
+              }}
+              className="flex flex-col sm:flex-row gap-4"
+            >
               <div className="flex-1">
                 <input
                   type="email"
+                  name="email"
+                  id="newsletter-email"
                   placeholder="Enter your email"
+                  required
                   className="w-full px-4 py-3 bg-vibe-gray-800 border border-vibe-gray-700 rounded-xl text-white placeholder-vibe-gray-400 focus:outline-none focus:border-vibe-purple-500 transition-colors"
                 />
               </div>
-              <button className="vibe-gradient text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-opacity flex items-center justify-center group cursor-pointer">
+              <button
+                type="submit"
+                className="vibe-gradient text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-opacity flex items-center justify-center group"
+              >
                 Subscribe
                 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
-            </div>
+            </form>
           </div>
         </motion.div>
 
@@ -101,9 +122,9 @@ export function Footer() {
               );
             })}
           </div>
-        </motion.div> 
+        </motion.div>
 
-        {/* Bottom Section */}
+        {/* Bottom Line */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

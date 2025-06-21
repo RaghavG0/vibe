@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation"; // <-- Next.js navigation
+import { useRouter } from "next/navigation";
 import { ArrowRight, Sparkles, CheckCircle } from "lucide-react";
-import { Button } from "./button";
+import { Button } from "@/components/landing/button"; // adjust path if different
 import { LoginModal } from "@/components/landing/LoginModal";
 
 const benefits = [
-  "Start with $0 - completely free forever plan",
+  "Start with $0 – completely free forever plan",
   "Set up your first budget in under 5 minutes",
   "AI-powered insights from day one",
   "Join 50K+ Gen Z users building wealth",
@@ -20,15 +20,14 @@ export function FinalCTA() {
 
   return (
     <section className="py-20 relative overflow-hidden">
-      {/* Background */}
+      {/* Background Gradient + Effects */}
       <div className="absolute inset-0 vibe-gradient" />
       <div className="absolute inset-0 bg-black/5" />
-
-      {/* Floating elements */}
       <div className="absolute top-20 left-20 w-32 h-32 bg-white/10 rounded-full blur-xl animate-float" />
       <div className="absolute bottom-20 right-20 w-40 h-40 bg-white/10 rounded-full blur-xl animate-float delay-1000" />
       <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-white/10 rounded-full blur-xl animate-float delay-2000" />
 
+      {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <motion.div
@@ -66,21 +65,31 @@ export function FinalCTA() {
             building wealth.
           </motion.p>
 
-          {/* Benefits */}
+          {/* Benefit List */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: {
+                opacity: 1,
+                y: 0,
+                transition: {
+                  staggerChildren: 0.1,
+                  delayChildren: 0.3,
+                },
+              },
+            }}
             className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-12"
           >
             {benefits.map((benefit, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
+                variants={{
+                  hidden: { opacity: 0, x: -20 },
+                  visible: { opacity: 1, x: 0 },
+                }}
                 className="flex items-center space-x-3 text-white/90"
               >
                 <CheckCircle className="w-5 h-5 text-vibe-mint-300 flex-shrink-0" />

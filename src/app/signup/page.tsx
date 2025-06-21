@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import Link from "next/link"; // ✅ Use next/link instead of react-router-dom
+import Link from "next/link";
 import {
   Eye,
   EyeOff,
@@ -15,12 +16,12 @@ import {
   TrendingUp,
   ArrowLeft,
 } from "lucide-react";
-
 import { Button } from "@/components/landing/button";
 
 export default function SignUp() {
   const router = useRouter();
-  // const [shouldOpenLogin, setShouldOpenLogin] = useState(false);
+
+  // Form state
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -31,24 +32,26 @@ export default function SignUp() {
     newsletter: false,
   });
 
+  // UI state
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showPasswordRecommendation, setShowPasswordRecommendation] = useState(false);
 
-  // Password strength validation
+
+  // Password requirements for strength meter
   const passwordRequirements = [
     { regex: /.{8,}/, text: "Minimum 8 characters" },
     { regex: /[a-z]/, text: "One lowercase letter" },
     { regex: /[A-Z]/, text: "One uppercase letter" },
     { regex: /\d/, text: "One number (0-9)" },
-    { regex: /[!@#$%^&*(),.?":{}|<>]/, text: "One special character" },
+    { regex: /[!@#$%^&*(),.?\":{}|<>]/, text: "One special character" },
   ];
 
+  // Calculate password strength
   const getPasswordStrength = (password: string) => {
-    const passed = passwordRequirements.filter((req) =>
-      req.regex.test(password),
-    );
+    const passed = passwordRequirements.filter((req) => req.regex.test(password));
     return {
       score: passed.length,
       total: passwordRequirements.length,
@@ -58,6 +61,7 @@ export default function SignUp() {
 
   const passwordStrength = getPasswordStrength(formData.password);
 
+  // Handle input changes for all fields
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -71,44 +75,57 @@ export default function SignUp() {
     }
   };
 
+  // Validate all form fields
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    // Validate first name
+    // First name
     if (!formData.firstName.trim()) {
       newErrors.firstName = "First name is required";
     }
-
-    // Validate last name
+    // Last name
     if (!formData.lastName.trim()) {
       newErrors.lastName = "Last name is required";
     }
-
-    // Validate email with proper format
+    // Email
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (
       !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email)
     ) {
-      newErrors.email =
-        "Please enter a valid email address (e.g., user@example.com)";
+      newErrors.email = "Please enter a valid email address (e.g., user@example.com)";
     }
-
-    // Validate password
+    // Password
     if (!formData.password) {
       newErrors.password = "Password is required";
-    } else if (passwordStrength.score < 5) {
-      newErrors.password = "Please meet all password requirements";
+    } else if (formData.password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
     }
 
-    // Validate confirm password
+    // Confirm password
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = "Please confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
-    // Validate terms and conditions (REQUIRED)
+    // Only show toast if there are no password errors so far
+    if (
+      !newErrors.password &&
+      !newErrors.confirmPassword &&
+      passwordStrength.score < passwordRequirements.length &&
+      !showPasswordRecommendation
+    ) {
+      toast(
+        "Your password could be stronger. Would you like to improve it or continue?",
+        {
+          icon: "⚠️",
+        }
+      );
+      setShowPasswordRecommendation(true);
+      return false;
+    }
+    // Terms agreement
     if (!formData.agreeToTerms) {
       newErrors.agreeToTerms =
         "You must agree to the Terms of Service and Privacy Policy to create an account";
@@ -118,21 +135,24 @@ export default function SignUp() {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});        // Clear all errors
+    setIsLoading(true);   // Show loading spinner
 
-    if (!validateForm()) return;
-
-    setIsLoading(true);
-
-    // Dummy registration logic
     setTimeout(() => {
-  console.log("Redirecting to onboarding...");
-  setIsLoading(false);
-  router.push("/onboarding?signup=success");
-}, 2000);
+      const isValid = validateForm(); // This sets errors if invalid
+      setIsLoading(false);
+      // If valid, proceed
+      if (isValid) {
+        router.push("/onboarding?signup=success");
+      }
+      // If not valid, errors will be shown (set by validateForm)
+    }, 400); // 400ms for the "refresh" effect
   };
 
+  // Helpers for password strength UI
   const getStrengthColor = () => {
     if (passwordStrength.percentage < 40) return "bg-red-500";
     if (passwordStrength.percentage < 80) return "bg-yellow-500";
@@ -164,8 +184,7 @@ export default function SignUp() {
             }}
           />
         </div>
-
-        {/* Content */}
+        {/* Branding Content */}
         <div className="relative z-10 flex flex-col justify-center items-center text-center px-12 py-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -179,18 +198,15 @@ export default function SignUp() {
               </div>
               <span className="text-2xl font-bold text-white">VibeWealth</span>
             </div>
-
             {/* Heading */}
             <h1 className="text-4xl font-bold text-white mb-6">
               Start your financial journey with us
             </h1>
-
             <p className="text-xl text-white/80 mb-8 leading-relaxed">
               Join thousands of Gen Z users who&apos;ve already transformed their
               relationship with money.
             </p>
-
-            {/* Features */}
+            {/* Features List */}
             <div className="space-y-4">
               {[
                 "AI-powered financial insights",
@@ -219,7 +235,7 @@ export default function SignUp() {
       {/* Right Side - Sign Up Form */}
       <div className="w-full lg:w-1/2 flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-800">
+        <div className="flex flex-col  sm:flex-row items-center justify-between sm:justify-between p-6 border-b border-gray-800 text-sm text-center sm:text-left">
           <Link
             href="/"
             className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
@@ -230,11 +246,10 @@ export default function SignUp() {
           <div className="flex items-center space-x-4 text-sm text-gray-400">
             <span>Already have an account?</span>
             <button
-              onClick={ () => {
+              onClick={() => {
                 router.push("/");
                 localStorage.setItem("openLogin", "true");
-              }
-              }
+              }}
               className="text-vibe-purple-400 hover:text-vibe-purple-300 font-medium cursor-pointer"
             >
               Sign In
@@ -257,9 +272,10 @@ export default function SignUp() {
               <p className="text-gray-400">Join the financial revolution</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6" noValidate>
               {/* Name Fields */}
               <div className="grid grid-cols-2 gap-4">
+                {/* First Name */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-300">
                     First Name
@@ -271,8 +287,7 @@ export default function SignUp() {
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleInputChange}
-                      placeholder="John"
-                      required
+                      placeholder="First Name"
                       className={`w-full pl-10 pr-4 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
                         errors.firstName
                           ? "border-red-500 focus:ring-red-500"
@@ -284,7 +299,7 @@ export default function SignUp() {
                     <p className="text-sm text-red-400">{errors.firstName}</p>
                   )}
                 </div>
-
+                {/* Last Name */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-300">
                     Last Name
@@ -296,8 +311,7 @@ export default function SignUp() {
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleInputChange}
-                      placeholder="Doe"
-                      required
+                      placeholder="Last Name"
                       className={`w-full pl-10 pr-4 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
                         errors.lastName
                           ? "border-red-500 focus:ring-red-500"
@@ -324,9 +338,6 @@ export default function SignUp() {
                     value={formData.email}
                     onChange={handleInputChange}
                     placeholder="you@example.com"
-                    required
-                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                    title="Please enter a valid email address"
                     className={`w-full pl-10 pr-4 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
                       errors.email
                         ? "border-red-500 focus:ring-red-500"
@@ -352,8 +363,6 @@ export default function SignUp() {
                     value={formData.password}
                     onChange={handleInputChange}
                     placeholder="Create a strong password"
-                    required
-                    minLength={8}
                     className={`w-full pl-10 pr-12 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
                       errors.password
                         ? "border-red-500 focus:ring-red-500"
@@ -372,8 +381,7 @@ export default function SignUp() {
                     )}
                   </button>
                 </div>
-
-                {/* Password Strength */}
+                {/* Password Strength Meter */}
                 {formData.password && (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
@@ -385,8 +393,8 @@ export default function SignUp() {
                           passwordStrength.percentage < 40
                             ? "text-red-400"
                             : passwordStrength.percentage < 80
-                              ? "text-yellow-400"
-                              : "text-green-400"
+                            ? "text-yellow-400"
+                            : "text-green-400"
                         }`}
                       >
                         {getStrengthText()}
@@ -422,7 +430,6 @@ export default function SignUp() {
                     </div>
                   </div>
                 )}
-
                 {errors.password && (
                   <p className="text-sm text-red-400">{errors.password}</p>
                 )}
@@ -441,15 +448,13 @@ export default function SignUp() {
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     placeholder="Confirm your password"
-                    required
-                    minLength={8}
                     className={`w-full pl-10 pr-12 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
                       errors.confirmPassword
                         ? "border-red-500 focus:ring-red-500"
                         : formData.confirmPassword &&
-                            formData.password === formData.confirmPassword
-                          ? "border-green-500 focus:ring-green-500"
-                          : "border-gray-700 focus:ring-vibe-purple-500 focus:border-transparent"
+                          formData.password === formData.confirmPassword
+                        ? "border-green-500 focus:ring-green-500"
+                        : "border-gray-700 focus:ring-vibe-purple-500 focus:border-transparent"
                     }`}
                   />
                   <button
@@ -464,7 +469,6 @@ export default function SignUp() {
                     )}
                   </button>
                 </div>
-
                 {/* Password Match Indicator */}
                 {formData.confirmPassword && (
                   <div className="flex items-center space-x-2">
@@ -485,7 +489,6 @@ export default function SignUp() {
                     )}
                   </div>
                 )}
-
                 {errors.confirmPassword && (
                   <p className="text-sm text-red-400">
                     {errors.confirmPassword}
@@ -495,13 +498,13 @@ export default function SignUp() {
 
               {/* Terms & Newsletter */}
               <div className="space-y-4">
+                {/* Terms of Service */}
                 <div className="flex items-start space-x-3">
                   <input
                     type="checkbox"
                     name="agreeToTerms"
                     checked={formData.agreeToTerms}
                     onChange={handleInputChange}
-                    required
                     className="mt-1 w-4 h-4 text-vibe-purple-500 bg-gray-800 border-gray-600 rounded focus:ring-vibe-purple-500 focus:ring-2 cursor-pointer"
                   />
                   <label className="text-sm text-gray-300">
@@ -524,7 +527,7 @@ export default function SignUp() {
                 {errors.agreeToTerms && (
                   <p className="text-sm text-red-400">{errors.agreeToTerms}</p>
                 )}
-
+                {/* Newsletter */}
                 <div className="flex items-start space-x-3">
                   <input
                     type="checkbox"
@@ -559,5 +562,5 @@ export default function SignUp() {
         </div>
       </div>
     </div>
-  );
+  )
 }

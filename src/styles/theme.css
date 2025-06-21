@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+/* Custom CSS Variables */
+@theme {
+  --color-background: 0 0% 100%;
+  --color-foreground: 222.2 84% 4.9%;
+  --color-card: 0 0% 100%;
+  --color-card-foreground: 222.2 84% 4.9%;
+  --color-popover: 0 0% 100%;
+  --color-popover-foreground: 222.2 84% 4.9%;
+  --color-primary: 262 83% 58%;
+  --color-primary-foreground: 210 40% 98%;
+  --color-secondary: 210 40% 96%;
+  --color-secondary-foreground: 222.2 84% 4.9%;
+  --color-muted: 210 40% 96%;
+  --color-muted-foreground: 215.4 16.3% 46.9%;
+  --color-accent: 210 40% 96%;
+  --color-accent-foreground: 222.2 84% 4.9%;
+  --color-destructive: 0 84.2% 60.2%;
+  --color-destructive-foreground: 210 40% 98%;
+  --color-border: 214.3 31.8% 91.4%;
+  --color-input: 214.3 31.8% 91.4%;
+  --color-ring: 262 83% 58%;
+  --radius: 0.5rem;
+
+  /* Vibe Brand Colors */
+  --color-vibe-purple-50: #f8f4ff;
+  --color-vibe-purple-100: #f0e7ff;
+  --color-vibe-purple-200: #e3d4ff;
+  --color-vibe-purple-300: #d0b5ff;
+  --color-vibe-purple-400: #b888ff;
+  --color-vibe-purple-500: #9f55ff;
+  --color-vibe-purple-600: #8b2bff;
+  --color-vibe-purple-700: #7518eb;
+  --color-vibe-purple-800: #6315c4;
+  --color-vibe-purple-900: #52129e;
+
+  --color-vibe-blue-50: #f0f8ff;
+  --color-vibe-blue-100: #e0f1fe;
+  --color-vibe-blue-200: #bae5fd;
+  --color-vibe-blue-300: #7dd3fc;
+  --color-vibe-blue-400: #38bdf8;
+  --color-vibe-blue-500: #0ea5e9;
+  --color-vibe-blue-600: #0284c7;
+  --color-vibe-blue-700: #0369a1;
+  --color-vibe-blue-800: #075985;
+  --color-vibe-blue-900: #0c4a6e;
+
+  --color-vibe-mint-50: #f0fdf9;
+  --color-vibe-mint-100: #ccfbef;
+  --color-vibe-mint-200: #99f6e0;
+  --color-vibe-mint-300: #5eead4;
+  --color-vibe-mint-400: #2dd4bf;
+  --color-vibe-mint-500: #14b8a6;
+  --color-vibe-mint-600: #0d9488;
+  --color-vibe-mint-700: #0f766e;
+  --color-vibe-mint-800: #115e59;
+  --color-vibe-mint-900: #134e4a;
+
+  --color-vibe-gray-50: #f9fafb;
+  --color-vibe-gray-100: #f3f4f6;
+  --color-vibe-gray-200: #e5e7eb;
+  --color-vibe-gray-300: #d1d5db;
+  --color-vibe-gray-400: #9ca3af;
+  --color-vibe-gray-500: #6b7280;
+  --color-vibe-gray-600: #4b5563;
+  --color-vibe-gray-700: #374151;
+  --color-vibe-gray-800: #1f2937;
+  --color-vibe-gray-900: #111827;
+}

@@ -6,7 +6,7 @@ import { motion, useInView } from "framer-motion";
 interface AnimatedCounterProps {
   value: string;
   suffix?: string;
-  duration?: number;
+  duration?: number; // in seconds
 }
 
 export function AnimatedCounter({
@@ -18,7 +18,7 @@ export function AnimatedCounter({
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
 
-  // Extract numeric part
+  // Converts things like "50K+" to 50000
   const getNumericValue = (val: string) => {
     const numStr = val.replace(/[^\d.]/g, "");
     const num = parseFloat(numStr);
@@ -37,6 +37,7 @@ export function AnimatedCounter({
     let startTime: number;
     let animationId: number;
 
+    // Simple custom animation frame logic with easeOut
     const animate = (currentTime: number) => {
       if (!startTime) startTime = currentTime;
       const elapsed = currentTime - startTime;
@@ -59,19 +60,12 @@ export function AnimatedCounter({
     };
   }, [isInView, targetValue, duration]);
 
+  // Formats number back to K/M/%/etc. for display
   const formatValue = (num: number) => {
-    if (value.includes("K")) {
-      return `${(num / 1000).toFixed(0)}K`;
-    }
-    if (value.includes("M")) {
-      return `${(num / 1000000).toFixed(1)}M`;
-    }
-    if (value.includes("%")) {
-      return `${num}%`;
-    }
-    if (value.includes("/")) {
-      return value;
-    }
+    if (value.includes("K")) return `${(num / 1000).toFixed(0)}K`;
+    if (value.includes("M")) return `${(num / 1000000).toFixed(1)}M`;
+    if (value.includes("%")) return `${num}%`;
+    if (value.includes("/")) return value;
     return num.toString();
   };
 
