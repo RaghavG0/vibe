@@ -18,7 +18,6 @@ export function BlogCarousel() {
   const {
     currentIndex,
     setCurrentIndex,
-    isAutoPlaying,
     setIsAutoPlaying,
     nextSlide,
     prevSlide,
