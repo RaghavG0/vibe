@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -37,7 +36,9 @@ export default function SignUp() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [showPasswordRecommendation, setShowPasswordRecommendation] = useState(false);
+  const [showPasswordRecommendationPopup, setShowPasswordRecommendationPopup] = useState(false);
+  const [hasShownPasswordRecommendation, setHasShownPasswordRecommendation] = useState(false);
+  const [isConfirmTyping, setIsConfirmTyping] = useState(false);
 
 
   // Password requirements for strength meter
@@ -115,15 +116,11 @@ export default function SignUp() {
       !newErrors.password &&
       !newErrors.confirmPassword &&
       passwordStrength.score < passwordRequirements.length &&
-      !showPasswordRecommendation
+      !showPasswordRecommendationPopup &&
+      !hasShownPasswordRecommendation
     ) {
-      toast(
-        "Your password could be stronger. Would you like to improve it or continue?",
-        {
-          icon: "⚠️",
-        }
-      );
-      setShowPasswordRecommendation(true);
+      setShowPasswordRecommendationPopup(true);
+      setHasShownPasswordRecommendation(true);
       return false;
     }
     // Terms agreement
@@ -138,6 +135,7 @@ export default function SignUp() {
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
+    setShowPasswordRecommendationPopup(false);
     e.preventDefault();
     setErrors({});        // Clear all errors
     setIsLoading(true);   // Show loading spinner
@@ -166,8 +164,28 @@ export default function SignUp() {
     return "Strong";
   };
 
+  const WeakPasswordToast = () =>
+      showPasswordRecommendationPopup ? (
+        <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="flex items-center bg-vibe-gray-800 border border-vibe-purple-500 text-white px-6 py-3 rounded-xl shadow-lg space-x-3 max-w-md">
+            <span className="text-xl">⚠️</span>
+            <span className="flex-1">
+              Your password could be stronger. If you still want to use this password, press ‘Update Password’ again.
+            </span>
+            <button
+              onClick={() => setShowPasswordRecommendationPopup(false)}
+              className="ml-4 text-gray-400 hover:text-white focus:outline-none cursor-pointer"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      ) : null;  
+
   return (
     <div className="min-h-screen bg-gray-900 flex">
+      <WeakPasswordToast />
       {/* Left Side - Branding */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
@@ -236,25 +254,31 @@ export default function SignUp() {
       {/* Right Side - Sign Up Form */}
       <div className="w-full lg:w-1/2 flex flex-col">
         {/* Header */}
-        <div className="flex flex-col  sm:flex-row items-center justify-between sm:justify-between p-6 border-b border-gray-800 text-sm text-center sm:text-left">
-          <Link
-            href="/"
-            className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Back to home</span>
-          </Link>
-          <div className="flex items-center space-x-4 text-sm text-gray-400">
-            <span>Already have an account?</span>
-            <button
-              onClick={() => {
-                router.push("/");
-                localStorage.setItem("openLogin", "true");
-              }}
-              className="text-vibe-purple-400 hover:text-vibe-purple-300 font-medium cursor-pointer"
+        <div className="flex flex-col sm:flex-row items-center justify-between p-6 border-b border-gray-800 text-sm text-center sm:text-left">
+          <div className="flex w-full justify-between items-center">
+            {/* Left: Back to home, vertically centered with right group */}
+            <Link
+              href="/"
+              className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
+              style={{ minWidth: 0 }}
             >
-              Sign In
-            </button>
+              <ArrowLeft className="w-5 h-5" />
+              <span>Back to home</span>
+            </Link>
+            {/* Right: Account group, stacked */}
+            <div className="flex flex-col items-end justify-center">
+              <span className="text-gray-400 text-sm">Already have an account?</span>
+              <button
+                onClick={() => {
+                  router.push("/");
+                  localStorage.setItem("openLogin", "true");
+                }}
+                className="text-vibe-purple-400 hover:text-vibe-purple-300 font-medium cursor-pointer mt-1"
+                style={{ lineHeight: 1 }}
+              >
+                Sign In
+              </button>
+            </div>
           </div>
         </div>
 
@@ -447,7 +471,13 @@ export default function SignUp() {
                     type={showConfirmPassword ? "text" : "password"}
                     name="confirmPassword"
                     value={formData.confirmPassword}
-                    onChange={handleInputChange}
+                    onFocus={() => setIsConfirmTyping(true)}
+                    onBlur={() => setIsConfirmTyping(false)}
+                    onChange={e => {
+                      handleInputChange(e);
+                      setIsConfirmTyping(true);
+                      setErrors(prev => ({ ...prev, confirmPassword: "" }));
+                    }}
                     placeholder="Confirm your password"
                     className={`w-full pl-10 pr-12 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
                       errors.confirmPassword
@@ -470,8 +500,8 @@ export default function SignUp() {
                     )}
                   </button>
                 </div>
-                {/* Password Match Indicator */}
-                {formData.confirmPassword && (
+                {/* Only one error/indicator at a time */}
+                {isConfirmTyping && formData.confirmPassword ? (
                   <div className="flex items-center space-x-2">
                     {formData.password === formData.confirmPassword ? (
                       <>
@@ -489,12 +519,11 @@ export default function SignUp() {
                       </>
                     )}
                   </div>
-                )}
-                {errors.confirmPassword && (
+                ) : errors.confirmPassword ? (
                   <p className="text-sm text-red-400">
                     {errors.confirmPassword}
                   </p>
-                )}
+                ) : null}
               </div>
 
               {/* Terms & Newsletter */}

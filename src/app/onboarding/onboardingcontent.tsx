@@ -4,12 +4,13 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import Select from "react-select";
+import Select from "./SelectClient";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import getSymbolFromCurrency from "currency-symbol-map";
 import currencyList from "currency-list";
 import countries from "world-countries";
+import type { GroupBase, SelectInstance } from "react-select";
 import {
   User,
   Calendar,
@@ -32,7 +33,39 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/landing/button";
 
-const steps = [
+// Custom date format function
+const formatDate = (date: Date | null, format: string, lang: string) => {
+  if (!date) return "";
+  switch (format) {
+    case "MM-DD-YYYY":
+      return date
+        .toLocaleDateString(lang, {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        })
+        .replace(/^(\d{2})\/(\d{2})\/(\d{4})$/, "$1-$2-$3");
+    case "DD-MM-YYYY":
+      return date
+        .toLocaleDateString(lang, {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        })
+        .replace(/^(\d{2})\/(\d{2})\/(\d{4})$/, "$2-$1-$3");
+    case "YYYY-MM-DD":
+      return date.toISOString().split("T")[0];
+    default:
+      return date.toLocaleDateString(lang);
+  }
+};
+
+type Step = {
+  number: number;
+  title: string;
+};
+
+const steps: Step[] = [
   { number: 1, title: "Setup" },
   { number: 2, title: "Preferences" },
   { number: 3, title: "Goals" },
@@ -55,12 +88,55 @@ const currencyOptions = Object.entries(currencyList.getAll("en")).map(
   })
 );
 
+const goalOptions = [
+  {
+    value: "budgeting",
+    label: "Better budgeting",
+    icon: <PiggyBank className="w-8 h-8 text-vibe-purple-400 mb-2" />,
+  },
+  {
+    value: "investing",
+    label: "Start investing",
+    icon: <TrendingUp className="w-8 h-8 text-vibe-purple-400 mb-2" />,
+  },
+  {
+    value: "saving",
+    label: "Save for goals",
+    icon: <Target className="w-8 h-8 text-vibe-purple-400 mb-2" />,
+  },
+  {
+    value: "learning",
+    label: "Financial education",
+    icon: <GraduationCap className="w-8 h-8 text-vibe-purple-400 mb-2" />,
+  },
+  {
+    value: "buyHome",
+    label: "Buy a home",
+    icon: <Home className="w-8 h-8 text-vibe-purple-400 mb-2" />,
+  },
+  {
+    value: "travel",
+    label: "Travel & experiences",
+    icon: <Plane className="w-8 h-8 text-vibe-purple-400 mb-2" />,
+  },
+  {
+    value: "health",
+    label: "Healthcare planning",
+    icon: <Heart className="w-8 h-8 text-vibe-purple-400 mb-2" />,
+  },
+  {
+    value: "business",
+    label: "Start a business",
+    icon: <Building className="w-8 h-8 text-vibe-purple-400 mb-2" />,
+  },
+];
+
 export default function Onboarding() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState<number>(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
@@ -77,12 +153,18 @@ export default function Onboarding() {
     currency: "USD",
     dateFormat: "MM-DD-YYYY",
     bringHere: "",
+    goals: [] as string[],
     primaryGoal: "",
     timeFrame: "",
     riskTolerance: "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Scroll to top on step change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentStep]);
 
   useEffect(() => {
     const signupSuccess = searchParams.get("signup");
@@ -92,6 +174,22 @@ export default function Onboarding() {
       return () => clearTimeout(timer);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dobWrapperRef.current &&
+        !dobWrapperRef.current.contains(event.target as Node)
+      ) {
+        setDobFocused(false);
+        setDobOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Validation functions
   const validateStep1 = () => {
@@ -109,10 +207,7 @@ export default function Onboarding() {
 
   const validateStep3 = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.bringHere) newErrors.bringHere = "Please select what brings you here";
-    if (!formData.primaryGoal) newErrors.primaryGoal = "Please select your primary goal";
-    if (!formData.timeFrame) newErrors.timeFrame = "Please select your time frame";
-    if (!formData.riskTolerance) newErrors.riskTolerance = "Please select your risk tolerance";
+    if (formData.goals.length === 0) newErrors.goals = "Please select at least one goal";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -120,6 +215,21 @@ export default function Onboarding() {
   // Input change handler
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: "" }));
+  };
+
+  // For multi-goal selection
+  const handleGoalToggle = (goal: string) => {
+    setFormData((prev) => {
+      const already = prev.goals.includes(goal);
+      if (already) {
+        return { ...prev, goals: prev.goals.filter((g) => g !== goal) };
+      } else if (prev.goals.length < 3) {
+        return { ...prev, goals: [...prev.goals, goal] };
+      }
+      return prev;
+    });
+    setErrors((prev) => ({ ...prev, goals: "" }));
   };
 
   // Photo upload
@@ -133,8 +243,14 @@ export default function Onboarding() {
   };
 
   // Step navigation
+  const [maxStepReached, setMaxStepReached] = useState<number>(1);
+
+  useEffect(() => {
+    setMaxStepReached((prev) => Math.max(prev, currentStep));
+  }, [currentStep]);
+
   const goToStep = (step: number) => {
-    if (step < currentStep || completedSteps.includes(step)) setCurrentStep(step);
+    if (step <= maxStepReached) setCurrentStep(step);
   };
 
   // Error refresh on submit
@@ -166,37 +282,36 @@ export default function Onboarding() {
   const signOut = () => router.push("/");
 
   // ProgressBar with center-to-center lines
-  const ProgressBar = () => (
+  const StepIndicator = () => (
     <div className="flex items-start justify-center mb-8 px-4">
       {steps.map((step, index) => (
         <div key={step.number} className="relative flex items-start">
           <div className="flex flex-col items-center px-2 sm:px-4 md:px-6">
             <div className="relative flex items-center">
               <button
+                type="button"
                 onClick={() => goToStep(step.number)}
-                disabled={step.number > currentStep && !completedSteps.includes(step.number)}
-                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-base sm:text-lg font-bold transition-all duration-300 ${
-                  completedSteps.includes(step.number)
-                    ? "bg-vibe-mint-500 text-white cursor-pointer"
-                    : currentStep === step.number
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 focus:outline-none
+                  ${
+                    currentStep > step.number
+                      ? "bg-vibe-mint-500 text-white"
+                      : currentStep === step.number
                       ? "vibe-gradient text-white"
-                      : step.number < currentStep
-                        ? "bg-gray-600 text-gray-300 cursor-pointer hover:bg-gray-500"
-                        : "bg-gray-800 text-gray-500 cursor-not-allowed"
-                }`}
+                      : "bg-gray-800 text-gray-400"
+                  }
+                  ${step.number <= maxStepReached ? "cursor-pointer" : "cursor-not-allowed"}
+                `}
+                disabled={step.number > maxStepReached}
+                aria-label={`Go to step ${step.title}`}
               >
-                {completedSteps.includes(step.number) ? (
-                  <Check className="w-4 h-4 sm:w-5 sm:h-5" />
-                ) : (
-                  step.number
-                )}
+                {currentStep > step.number ? <Check className="w-5 h-5" /> : step.number}
               </button>
               {/* Connecting line */}
               {index < steps.length - 1 && (
-                <div className="absolute left-full top-1/2 transform -translate-y-1/2 w-12 sm:w-16 md:w-20 h-0.5">
+                <div className="absolute left-full top-1/2 transform -translate-y-1/2 w-16 sm:w-20 md:w-24 lg:w-28 h-0.5">
                   <div
                     className={`w-full h-0.5 transition-all duration-300 ${
-                      completedSteps.includes(step.number) ? "bg-vibe-mint-500" : "bg-gray-700"
+                      currentStep > step.number ? "bg-vibe-mint-500" : "bg-gray-700"
                     }`}
                   />
                 </div>
@@ -223,30 +338,61 @@ export default function Onboarding() {
     return found?.symbol || "$";
   };
 
+  // Language map for demo
+  const languageMap: Record<string, string> = {
+    en: "English (en)",
+    es: "Spanish (es)",
+    fr: "French (fr)",
+    de: "German (de)",
+  };
+
+  const datePickerRef = useRef<DatePicker | null>(null);
+  const [dobFocused, setDobFocused] = useState(false);
+  const [dobOpen, setDobOpen] = useState(false);
+  const [countryFocused, setCountryFocused] = useState(false);
+  const dobWrapperRef = useRef<HTMLDivElement>(null);
+  const countrySelectRef = useRef<SelectInstance<{ value: string; label: React.ReactNode }, false, GroupBase<{ value: string; label: React.ReactNode }>>>(null);
+  const [colorThemeFocused, setColorThemeFocused] = useState(false);
+  const [languageFocused, setLanguageFocused] = useState(false);
+  const [currencyFocused, setCurrencyFocused] = useState(false);
+  const [dateFormatFocused, setDateFormatFocused] = useState(false);
+
+  const colorThemeSelectRef = useRef<SelectInstance<{ value: string; label: React.ReactNode }, false, GroupBase<{ value: string; label: React.ReactNode }>>>(null);
+  const languageSelectRef = useRef<SelectInstance<{ value: string; label: React.ReactNode }, false, GroupBase<{ value: string; label: React.ReactNode }>>>(null);
+  const currencySelectRef = useRef<SelectInstance<{ value: string; label: React.ReactNode }, false, GroupBase<{ value: string; label: React.ReactNode }>>>(null);
+  const dateFormatSelectRef = useRef<SelectInstance<{ value: string; label: React.ReactNode }, false, GroupBase<{ value: string; label: React.ReactNode }>>>(null);
+
   return (
     <div className="min-h-screen bg-gray-900">
       {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-gray-800">
-        <button
-          onClick={() => router.push("/")}
-          className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span className="hidden sm:inline">Back to home</span>
-        </button>
-        <div className="flex items-center space-x-3">
+      <div className="relative h-[72px] border-b border-gray-800 flex items-center justify-center bg-gray-900">
+        {/* Left: Back to home */}
+        <div className="absolute left-6 top-1/2 -translate-y-1/2">
+          <button
+            onClick={() => router.push("/")}
+            className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors cursor-pointer"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="hidden sm:inline">Back to home</span>
+          </button>
+        </div>
+        {/* Center: VibeWealth */}
+        <div className="flex items-center space-x-3 justify-center">
           <div className="w-8 h-8 bg-vibe-purple-600 rounded-xl flex items-center justify-center">
             <TrendingUp className="w-5 h-5 text-white" />
           </div>
           <span className="text-white font-semibold">VibeWealth</span>
         </div>
-        <button
-          onClick={signOut}
-          className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
-        >
-          <span className="hidden sm:inline">Sign out</span>
-          <LogOut className="w-5 h-5" />
-        </button>
+        {/* Right: Sign out */}
+        <div className="absolute right-6 top-1/2 -translate-y-1/2">
+          <button
+            onClick={signOut}
+            className="flex items-center space-x-2 text-red-400 hover:text-red-300 transition-colors cursor-pointer"
+          >
+            <span className="hidden sm:inline">Sign out</span>
+            <LogOut className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Signup Success Popup */}
@@ -280,7 +426,7 @@ export default function Onboarding() {
           transition={{ duration: 0.6 }}
           className="w-full max-w-2xl"
         >
-          <ProgressBar />
+          <StepIndicator />
 
           {/* Step Content */}
           <AnimatePresence mode="wait">
@@ -295,12 +441,12 @@ export default function Onboarding() {
               {/* Step 1: Personal Info */}
               {currentStep === 1 && (
                 <div className="p-8">
-                  <div className="text-center mb-8">
-                    <h2 className="text-3xl font-bold text-white mb-2">
-                      Let\&apos;s set up your account
+                  <div className="text-center mb-10">
+                    <h2 className="text-3xl font-bold text-white mb-4">
+                      Let&apos;s set up your account
                     </h2>
-                    <p className="text-gray-400">
-                      First things first, let\&apos;s get your profile set up.
+                    <p className="text-gray-400 text-lg">
+                      First things first, let&apos;s get your profile set up.
                     </p>
                   </div>
                   {/* Photo Upload */}
@@ -308,12 +454,12 @@ export default function Onboarding() {
                     <div className="relative">
                       <div
                         onClick={() => fileInputRef.current?.click()}
-                        className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-600 transition-colors border-2 border-dashed border-gray-600 hover:border-gray-500"
+                        className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-600 transition-colors border-2 border-dashed border-vibe-purple-400 hover:border-vibe-purple-300"
                       >
                         {profilePhoto ? (
                           <Image src={profilePhoto} alt="Profile" className="w-full h-full rounded-full object-cover" />
                         ) : (
-                          <Camera className="w-8 h-8 text-gray-400" />
+                          <Camera className="w-8 h-8 text-vibe-purple-400" />
                         )}
                       </div>
                       <input
@@ -325,130 +471,267 @@ export default function Onboarding() {
                       />
                     </div>
                   </div>
-                  <div className="text-center mb-6">
+                  <div className="text-center mb-8">
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="text-sm text-vibe-purple-400 hover:text-vibe-purple-300 transition-colors"
+                      className="text-base text-vibe-purple-400 hover:text-vibe-purple-300 transition-colors cursor-pointer"
                     >
                       <Camera className="w-4 h-4 inline mr-1" />
                       Upload photo (optional)
                     </button>
-                    <p className="text-xs text-gray-500 mt-1">JPG or PNG. 5MB max.</p>
+                    <p className="text-xs text-gray-500 mt-2">JPG or PNG. 5MB max.</p>
                   </div>
-                  <form className="space-y-6" noValidate>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <form
+                    className="space-y-7"
+                    noValidate
+                    onSubmit={e => {
+                      e.preventDefault();
+                      goNext();
+                    }}
+                  >
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                       {/* First Name */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-300">First Name</label>
+                      <div>
+                        <label className="text-base font-medium text-gray-300 mb-3 block">First Name</label>
                         <div className="relative">
-                          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                           <input
                             type="text"
                             value={formData.firstName}
                             onChange={e => handleInputChange("firstName", e.target.value)}
                             placeholder="First Name"
-                            className={`w-full pl-10 pr-4 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
+                            className={`w-full pl-10 pr-4 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all cursor-pointer ${
                               errors.firstName
                                 ? "border-red-500 focus:ring-red-500"
                                 : "border-gray-700 focus:ring-vibe-purple-500 focus:border-transparent"
                             }`}
                           />
                         </div>
-                        {errors.firstName && <p className="text-sm text-red-400">{errors.firstName}</p>}
+                        {errors.firstName && <p className="text-sm text-red-400 mt-2">{errors.firstName}</p>}
                       </div>
                       {/* Last Name */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-300">Last Name</label>
+                      <div>
+                        <label className="text-base font-medium text-gray-300 mb-3 block">Last Name</label>
                         <div className="relative">
-                          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                           <input
                             type="text"
                             value={formData.lastName}
                             onChange={e => handleInputChange("lastName", e.target.value)}
                             placeholder="Last Name"
-                            className={`w-full pl-10 pr-4 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
+                            className={`w-full pl-10 pr-4 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all cursor-pointer ${
                               errors.lastName
                                 ? "border-red-500 focus:ring-red-500"
                                 : "border-gray-700 focus:ring-vibe-purple-500 focus:border-transparent"
                             }`}
                           />
                         </div>
-                        {errors.lastName && <p className="text-sm text-red-400">{errors.lastName}</p>}
+                        {errors.lastName && <p className="text-sm text-red-400 mt-2">{errors.lastName}</p>}
                       </div>
                     </div>
                     {/* User Name */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-300">User Name</label>
+                    <div>
+                      <label className="text-base font-medium text-gray-300 mb-3 block">User Name</label>
                       <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                         <input
                           type="text"
                           value={formData.userName}
                           onChange={e => handleInputChange("userName", e.target.value)}
                           placeholder="User Name"
-                          className={`w-full pl-10 pr-4 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
+                          className={`w-full pl-10 pr-4 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all cursor-pointer ${
                             errors.userName
                               ? "border-red-500 focus:ring-red-500"
                               : "border-gray-700 focus:ring-vibe-purple-500 focus:border-transparent"
                           }`}
                         />
                       </div>
-                      {errors.userName && <p className="text-sm text-red-400">{errors.userName}</p>}
+                      {errors.userName && <p className="text-sm text-red-400 mt-2">{errors.userName}</p>}
                     </div>
-                    {/* Date of Birth */}
-                    <div className="space-y-2 col-span-1 sm:col-span-2">
-                      <label className="text-sm font-medium text-gray-300">Date of Birth</label>
-                      <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                        <DatePicker
-                          selected={dob}
-                          onChange={date => {
-                            setDob(date);
-                            handleInputChange("dob", date ? date.toISOString().split("T")[0] : "");
-                          }}
-                          dateFormat="yyyy-MM-dd"
-                          placeholderText="Select date of birth"
-                          className={`w-full pl-10 pr-4 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
-                            errors.dob
-                              ? "border-red-500 focus:ring-red-500"
-                              : "border-gray-700 focus:ring-vibe-purple-500 focus:border-transparent"
-                          }`}
-                          maxDate={new Date()}
-                          showMonthDropdown
-                          showYearDropdown
-                          dropdownMode="select"
-                        />
+                    {/* Date of Birth & Country */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Date of Birth */}
+                      <div className="mb-7">
+                          <label className="text-base font-medium text-gray-300 mb-3 block">
+                            Date of Birth
+                          </label>
+                          <div
+                            ref={dobWrapperRef}
+                            className={`relative w-full h-12 bg-gray-800 border rounded-xl transition-colors
+                              ${(dobFocused || dobOpen) ? "border-vibe-purple-500" : "border-gray-700"}
+                            `}
+                          >
+                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10" />
+                            <div className="absolute right-10 top-2 bottom-2 w-px bg-gray-700 z-10" />
+                            <svg
+                              className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10 cursor-pointer"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              viewBox="0 0 24 24"
+                              onClick={() => datePickerRef.current?.setOpen?.(true)}
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                            <DatePicker
+                              ref={datePickerRef}
+                              selected={dob}
+                              onChange={date => {
+                                setDob(date);
+                                handleInputChange("dob", date ? date.toISOString().split("T")[0] : "");
+                              }}
+                              dateFormat="dd-MM-yyyy"
+                              placeholderText="dd-mm-yyyy"
+                              className="w-full pl-10 pr-10 py-3 bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
+                              maxDate={new Date()}
+                              showMonthDropdown
+                              showYearDropdown
+                              dropdownMode="select"
+                              autoComplete="off"
+                              isClearable
+                              onFocus={() => setDobFocused(true)}
+                              onBlur={() => {
+                                setDobFocused(false);
+                                setDobOpen(false);
+                              }}
+                              onCalendarOpen={() => setDobOpen(true)}
+                              onCalendarClose={() => setDobOpen(false)}
+                            />
+                          </div>
+                          {errors.dob && <p className="text-sm text-red-400 mt-2">{errors.dob}</p>}
                       </div>
-                      {errors.dob && <p className="text-sm text-red-400">{errors.dob}</p>}
+                      {/* Country */}
+                      <div className="mb-7">
+                        <label className="text-base font-medium text-gray-300 mb-3 block">Country</label>
+                        <div
+                          className={`relative w-full h-12 bg-gray-800 border rounded-xl transition-colors cursor-text
+                            ${countryFocused ? "border-vibe-purple-500" : "border-gray-700"}
+                          `}
+                          onClick={() => {
+                            // Focus the react-select input when clicking anywhere in the box
+                            document.querySelector<HTMLInputElement>('.country-select input')?.focus();
+                          }}
+                        >
+                          <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 pointer-events-none" />
+                          <div className="absolute right-10 top-2 bottom-2 w-px bg-gray-700 z-10" />
+                          <svg
+                            className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10 cursor-pointer"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            viewBox="0 0 24 24"
+                            onClick={e => {
+                              e.stopPropagation();
+                              // Focus the select input
+                              document.querySelector<HTMLInputElement>('.country-select input')?.focus();
+                              // Open the menu (react-select opens menu on focus, but to force it, use setState if needed)
+                              setCountryFocused(true);
+                              // Optionally, if your SelectClient supports openMenu, call it:
+                              countrySelectRef.current?.focus();
+                              countrySelectRef.current?.onMenuOpen?.();
+                            }}
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                          </svg>
+                          <Select
+                            ref={countrySelectRef}
+                            className="country-select w-full h-12 pl-10 pr-10 bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
+                            options={countryOptions.map(c => ({
+                              value: c.name,
+                              label: `${c.flag} ${c.name}`,
+                            }))}
+                            value={
+                              formData.country
+                                ? { value: formData.country, label: `${countryOptions.find(c => c.name === formData.country)?.flag || ""} ${formData.country}` }
+                                : null
+                            }
+                            onChange={opt => handleInputChange("country", opt?.value || "")}
+                            placeholder="Select Country"
+                            menuPlacement="top"
+                            onFocus={() => setCountryFocused(true)}
+                            onBlur={() => setCountryFocused(false)}
+                            styles={{
+                              control: (base) => ({
+                                ...base,
+                                background: "transparent",
+                                border: "none",
+                                boxShadow: "none",
+                                minHeight: "3rem",
+                                paddingLeft: 0,
+                                cursor: "pointer",
+                              }),
+                              valueContainer: (base) => ({
+                                ...base,
+                                paddingLeft: 0,
+                              }),
+                              placeholder: (base) => ({
+                                ...base,
+                                color: "#9ca3af",
+                                opacity: 1,
+                                cursor: "pointer",
+                              }),
+                              singleValue: (base) => ({
+                                ...base,
+                                color: "#fff",
+                              }),
+                              input: (base) => ({
+                                ...base,
+                                color: "#fff",
+                              }),
+                              indicatorsContainer: (base) => ({
+                                ...base,
+                                display: "none",
+                              }),
+                              dropdownIndicator: (base) => ({
+                                ...base,
+                                display: "none",
+                              }),
+                              indicatorSeparator: (base) => ({
+                                ...base,
+                                display: "none",
+                              }),
+                              menu: (base) => ({
+                                ...base,
+                                background: "#1f2937",
+                                color: "#fff",
+                              }),
+                              option: (base, state) => ({
+                                ...base,
+                                background: state.isSelected
+                                  ? "#a78bfa"
+                                  : state.isFocused
+                                  ? "#4b5563"
+                                  : "#1f2937",
+                                color: "#fff",
+                              }),
+                            }}
+                          />
+                        </div>
+                        {errors.country && <p className="text-sm text-red-400 mt-2">{errors.country}</p>}
+                      </div>
                     </div>
-                    {/* Country */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-300">Country</label>
-                      <div className="relative">
-                        <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 pointer-events-none" />
-                        <Select
-                          options={countryOptions.map(c => ({
-                            value: c.name,
-                            label: `${c.flag} ${c.name}`,
-                          }))}
-                          value={
-                            formData.country
-                              ? { value: formData.country, label: `${countryOptions.find(c => c.name === formData.country)?.flag || ""} ${formData.country}` }
-                              : null
-                          }
-                          onChange={opt => handleInputChange("country", opt?.value || "")}
-                          classNamePrefix="react-select"
-                          placeholder="Select Country"
-                          styles={{
-                            control: base => ({
-                              ...base,
-                              paddingLeft: "2.5rem",
-                            }),
-                          }}
-                          menuPlacement="top"
-                        />
-                      </div>
-                      {errors.country && <p className="text-sm text-red-400">{errors.country}</p>}
+                    {/* Navigation Buttons for Step 1 */}
+                    <div className="flex flex-row justify-between items-center gap-4 pt-4">
+                      <Button
+                        onClick={goPrevious}
+                        disabled={currentStep === 1}
+                        variant="outline"
+                        className={`h-12 border-gray-700 bg-gray-800 text-white hover:bg-gray-700 cursor-pointer ${
+                          currentStep === 1 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                        }`}
+                      >
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Previous
+                      </Button>
+                      <Button
+                        type="submit"
+                        className="h-12 vibe-gradient hover:opacity-90 text-white cursor-pointer"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span>Continue</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </div>
+                      </Button>
                     </div>
                   </form>
                 </div>
@@ -457,202 +740,674 @@ export default function Onboarding() {
               {/* Step 2: Preferences */}
               {currentStep === 2 && (
                 <div className="p-8">
-                  <div className="text-center mb-8">
-                    <h2 className="text-2xl font-bold text-white mb-2">Configure your preferences</h2>
-                    <p className="text-gray-400">Let\&apos;s configure your preferences.</p>
+                  <div className="text-center mb-10">
+                    <h2 className="text-2xl font-bold text-white mb-4">Configure your preferences</h2>
+                    <p className="text-gray-400 text-lg">Let&apos;s configure your preferences.</p>
                   </div>
                   {/* Example Account Display */}
-                  <div className="bg-gray-700 rounded-xl p-6 mb-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-white font-medium mb-1">Example account</h3>
-                        <div className="text-2xl font-bold text-white truncate">
-                          {getCurrencySymbol(formData.currency)}
-                          2,325.25
-                        </div>
-                        <div className="text-sm text-vibe-mint-400">
-                          +{getCurrencySymbol(formData.currency)}78.90 (+3.39) as of 10-23-2024
-                        </div>
+                  <div className="bg-gray-700 rounded-xl p-6 mb-8 flex flex-col items-center justify-center text-center">
+                    <div className="flex flex-col items-center mb-4">
+                      <h3 className="text-white font-medium mb-2">Example account</h3>
+                      <div className="text-2xl font-bold text-white truncate">
+                        {getCurrencySymbol(formData.currency) } 
+                        2,325.25
                       </div>
-                      <div className="w-16 h-8">
-                        <svg viewBox="0 0 100 40" className="w-full h-full">
-                          <path
-                            d="M10,30 Q30,10 50,15 T90,10"
-                            stroke="#10b981"
-                            strokeWidth="2"
-                            fill="none"
-                          />
-                        </svg>
+                      <div className="text-sm text-vibe-mint-400">
+                        +{getCurrencySymbol(formData.currency) }78.90 (+3.39) as of {formatDate(new Date("2024-10-23"), formData.dateFormat, formData.language)}
                       </div>
+                    </div>
+                    <div className="text-base text-gray-400 mb-2">
+                      Language: {languageMap[formData.language] || "English (en)"}
                     </div>
                     <p className="text-xs text-gray-400">
                       Preview how data displays based on preferences.
                     </p>
                   </div>
-                  <form className="space-y-6" noValidate>
+                  <form className="space-y-7" noValidate>
                     {/* Color Theme */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-300">Color theme</label>
-                      <Select
-                        options={[
-                          { value: "system", label: "System" },
-                          { value: "dark", label: "Dark" },
-                          { value: "light", label: "Light" },
-                        ]}
-                        value={{
-                          value: formData.colorTheme,
-                          label:
-                            formData.colorTheme.charAt(0).toUpperCase() +
-                            formData.colorTheme.slice(1),
+                    <div className="mb-7">
+                      <label className="text-base font-medium text-gray-300 mb-3 block">Color theme</label>
+                      <div
+                        className={`relative w-full h-12 bg-gray-800 border rounded-xl transition-colors cursor-text
+                          ${colorThemeFocused ? "border-vibe-purple-500" : "border-gray-700"}
+                        `}
+                        onClick={() => {
+                          colorThemeSelectRef.current?.focus();
+                          colorThemeSelectRef.current?.onMenuOpen?.();
                         }}
-                        onChange={opt => handleInputChange("colorTheme", opt?.value || "")}
-                        classNamePrefix="react-select"
-                        placeholder="Select Theme"
-                      />
-                    </div>
-                    {/* Language */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-300">Language</label>
-                      <Select
-                        options={[
-                          { value: "en", label: "English (en)" },
-                          { value: "es", label: "Spanish (es)" },
-                          { value: "fr", label: "French (fr)" },
-                          { value: "de", label: "German (de)" },
-                        ]}
-                        value={{
-                          value: formData.language,
-                          label:
+                      >
+                        <Sparkles
+                          className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 z-10 text-gray-400 pointer-events-none"
+                        />
+                        <div className="absolute right-10 top-2 bottom-2 w-px bg-gray-700 z-10" />
+                        <svg
+                          className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10 cursor-pointer"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                          onClick={e => {
+                            e.stopPropagation();
+                            colorThemeSelectRef.current?.focus();
+                            colorThemeSelectRef.current?.onMenuOpen?.();
+                          }}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        <Select
+                          ref={colorThemeSelectRef}
+                          className="color-theme-select w-full h-12 pl-10 pr-10 bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
+                          options={[
                             {
-                              en: "English (en)",
-                              es: "Spanish (es)",
-                              fr: "French (fr)",
-                              de: "German (de)",
-                            }[formData.language],
-                        }}
-                        onChange={opt => handleInputChange("language", opt?.value || "")}
-                        classNamePrefix="react-select"
-                        placeholder="Select Language"
-                      />
+                              value: "system",
+                              label: (
+                                <span className="flex items-center">
+                                  <Sparkles className="w-5 h-5 mr-2 -mt-1 text-gray-400" />
+                                  System
+                                </span>
+                              ),
+                            },
+                            {
+                              value: "dark",
+                              label: (
+                                <span className="flex items-center">
+                                  <Sparkles className="w-5 h-5 mr-2 -mt-1 text-gray-400" />
+                                  Dark
+                                </span>
+                              ),
+                            },
+                            {
+                              value: "light",
+                              label: (
+                                <span className="flex items-center">
+                                  <Sparkles className="w-5 h-5 mr-2 -mt-1 text-gray-400" />
+                                  Light
+                                </span>
+                              ),
+                            },
+                          ]}
+                          value={{
+                            value: formData.colorTheme,
+                            label: (
+                              <span className="flex items-center">
+                                {formData.colorTheme.charAt(0).toUpperCase() + formData.colorTheme.slice(1)}
+                              </span>
+                            ),
+                          }}
+                          onChange={opt => handleInputChange("colorTheme", opt?.value || "")}
+                          placeholder={
+                            <span className="flex items-center">
+                              <span>Select Theme</span>
+                            </span>
+                          }
+                          onFocus={() => setColorThemeFocused(true)}
+                          onBlur={() => setColorThemeFocused(false)}
+                          components={{
+                            IndicatorSeparator: () => null,
+                            DropdownIndicator: () => null,
+                          }}
+                          styles={{
+                            control: base => ({
+                              ...base,
+                              background: "transparent",
+                              border: "none",
+                              boxShadow: "none",
+                              minHeight: "3rem",
+                              paddingLeft: 0,
+                              cursor: "text",
+                            }),
+                            valueContainer: base => ({
+                              ...base,
+                              paddingLeft: 0,
+                            }),
+                            placeholder: base => ({
+                              ...base,
+                              color: "#9ca3af",
+                              opacity: 1,
+                              cursor: "text",
+                              display: "flex",
+                              alignItems: "center",
+                            }),
+                            singleValue: base => ({
+                              ...base,
+                              color: "#fff",
+                              display: "flex",
+                              alignItems: "center",
+                            }),
+                            input: base => ({
+                              ...base,
+                              color: "#fff",
+                            }),
+                            indicatorsContainer: base => ({
+                              ...base,
+                              display: "none",
+                            }),
+                            menu: base => ({
+                              ...base,
+                              background: "#1f2937",
+                              color: "#fff",
+                              left: 0,
+                              zIndex: 1000,
+                            }),
+                            option: (base, state) => ({
+                              ...base,
+                              background: state.isSelected
+                                ? "#a78bfa"
+                                : state.isFocused
+                                ? "#4b5563"
+                                : "#1f2937",
+                              color: "#fff",
+                              display: "flex",
+                              alignItems: "center",
+                            }),
+                          }}
+                        />
+                      </div>
                     </div>
+
+                    {/* Language */}
+                    <div className="mb-7">
+                      <label className="text-base font-medium text-gray-300 mb-3 block">Language</label>
+                      <div
+                        className={`relative w-full h-12 bg-gray-800 border rounded-xl transition-colors cursor-text
+                          ${languageFocused ? "border-vibe-purple-500" : "border-gray-700"}
+                        `}
+                        onClick={() => {
+                          languageSelectRef.current?.focus();
+                          languageSelectRef.current?.onMenuOpen?.();
+                        }}
+                      >
+                        <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 pointer-events-none" />
+                        <div className="absolute right-10 top-2 bottom-2 w-px bg-gray-700 z-10" />
+                        <svg
+                          className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10 cursor-pointer"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                          onClick={e => {
+                            e.stopPropagation();
+                            languageSelectRef.current?.focus();
+                            languageSelectRef.current?.onMenuOpen?.();
+                          }}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        <Select
+                          ref={languageSelectRef}
+                          className="language-select w-full h-12 pl-10 pr-10 bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
+                          options={[
+                            {
+                              value: "en",
+                              label: (
+                                <span className="flex items-center">
+                                  <Globe className="w-5 h-5 mr-2 -mt-1 text-gray-400" />
+                                  English (en)
+                                </span>
+                              ),
+                            },
+                            {
+                              value: "es",
+                              label: (
+                                <span className="flex items-center">
+                                  <Globe className="w-5 h-5 mr-2 -mt-1 text-gray-400" />
+                                  Spanish (es)
+                                </span>
+                              ),
+                            },
+                            {
+                              value: "fr",
+                              label: (
+                                <span className="flex items-center">
+                                  <Globe className="w-5 h-5 mr-2 -mt-1 text-gray-400" />
+                                  French (fr)
+                                </span>
+                              ),
+                            },
+                            {
+                              value: "de",
+                              label: (
+                                <span className="flex items-center">
+                                  <Globe className="w-5 h-5 mr-2 -mt-1 text-gray-400" />
+                                  German (de)
+                                </span>
+                              ),
+                            },
+                          ]}
+                          value={{
+                            value: formData.language,
+                            label: (
+                              <span className="flex items-center">
+                                {languageMap[formData.language] || "English (en)"}
+                              </span>
+                            ),
+                          }}
+                          onChange={opt => handleInputChange("language", opt?.value || "")}
+                          placeholder={
+                            <span className="flex items-center">
+                              <span>Select Language</span>
+                            </span>
+                          }
+                          onFocus={() => setLanguageFocused(true)}
+                          onBlur={() => setLanguageFocused(false)}
+                          components={{
+                            IndicatorSeparator: () => null,
+                            DropdownIndicator: () => null,
+                          }}
+                          styles={{
+                            control: base => ({
+                              ...base,
+                              background: "transparent",
+                              border: "none",
+                              boxShadow: "none",
+                              minHeight: "3rem",
+                              paddingLeft: 0,
+                              cursor: "text",
+                            }),
+                            valueContainer: base => ({
+                              ...base,
+                              paddingLeft: 0,
+                            }),
+                            placeholder: base => ({
+                              ...base,
+                              color: "#9ca3af",
+                              opacity: 1,
+                              cursor: "text",
+                              display: "flex",
+                              alignItems: "center",
+                            }),
+                            singleValue: base => ({
+                              ...base,
+                              color: "#fff",
+                              display: "flex",
+                              alignItems: "center",
+                            }),
+                            input: base => ({
+                              ...base,
+                              color: "#fff",
+                            }),
+                            indicatorsContainer: base => ({
+                              ...base,
+                              display: "none",
+                            }),
+                            menu: base => ({
+                              ...base,
+                              background: "#1f2937",
+                              color: "#fff",
+                              left: 0,
+                              zIndex: 1000,
+                            }),
+                            option: (base, state) => ({
+                              ...base,
+                              background: state.isSelected
+                                ? "#a78bfa"
+                                : state.isFocused
+                                ? "#4b5563"
+                                : "#1f2937",
+                              color: "#fff",
+                              display: "flex",
+                              alignItems: "center",
+                            }),
+                          }}
+                        />
+                      </div>
+                    </div>
+
                     {/* Currency */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-300">Currency</label>
-                      <Select
-                        options={currencyOptions.map(c => ({
-                          value: c.code,
-                          label: `${c.symbol} ${c.name} (${c.code})`,
-                        }))}
-                        value={
-                          formData.currency
-                            ? {
-                                value: formData.currency,
-                                label: `${getSymbolFromCurrency(formData.currency) || formData.currency} ${
-                                  currencyOptions.find(c => c.code === formData.currency)?.name || ""
-                                } (${formData.currency})`,
-                              }
-                            : null
-                        }
-                        onChange={opt => handleInputChange("currency", opt?.value || "")}
-                        classNamePrefix="react-select"
-                        placeholder="Select Currency"
-                      />
-                    </div>
-                    {/* Date Format */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-300">Date format</label>
-                      <Select
-                        options={[
-                          { value: "MM-DD-YYYY", label: "MM-DD-YYYY" },
-                          { value: "DD-MM-YYYY", label: "DD-MM-YYYY" },
-                          { value: "YYYY-MM-DD", label: "YYYY-MM-DD" },
-                        ]}
-                        value={{
-                          value: formData.dateFormat,
-                          label: formData.dateFormat,
+                    <div className="mb-7">
+                      <label className="text-base font-medium text-gray-300 mb-3 block">Currency</label>
+                      <div
+                        className={`relative w-full h-12 bg-gray-800 border rounded-xl transition-colors cursor-text
+                          ${currencyFocused ? "border-vibe-purple-500" : "border-gray-700"}
+                        `}
+                        onClick={() => {
+                          currencySelectRef.current?.focus();
+                          currencySelectRef.current?.onMenuOpen?.();
                         }}
-                        onChange={opt => handleInputChange("dateFormat", opt?.value || "")}
-                        classNamePrefix="react-select"
-                        placeholder="Select Date Format"
-                      />
+                      >
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 pointer-events-none">
+                          {getSymbolFromCurrency(formData.currency) || "$"}
+                        </span>
+                        <div className="absolute right-10 top-2 bottom-2 w-px bg-gray-700 z-10" />
+                        <svg
+                          className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10 cursor-pointer"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                          onClick={e => {
+                            e.stopPropagation();
+                            currencySelectRef.current?.focus();
+                            currencySelectRef.current?.onMenuOpen?.();
+                          }}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        <Select
+                          ref={currencySelectRef}
+                          className="currency-select w-full h-12 pl-10 pr-10 bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
+                          options={currencyOptions.map(c => ({
+                            value: c.code,
+                            label: (
+                              <span className="flex items-center">
+                                <span className="w-5 h-5 mr-2 -mt-1 text-gray-400">{c.symbol}</span>
+                                {c.name} ({c.code})
+                              </span>
+                            ),
+                          }))}
+                          value={
+                            formData.currency
+                              ? {
+                                  value: formData.currency,
+                                  label: (
+                                    <span className="flex items-center">
+                                      {currencyOptions.find(c => c.code === formData.currency)?.name || ""}
+                                      {" "}
+                                      ({formData.currency})
+                                    </span>
+                                  ),
+                                }
+                              : null
+                          }
+                          onChange={opt => handleInputChange("currency", opt?.value || "")}
+                          placeholder={
+                            <span className="flex items-center">
+                              <span>Select Currency</span>
+                            </span>
+                          }
+                          onFocus={() => setCurrencyFocused(true)}
+                          onBlur={() => setCurrencyFocused(false)}
+                          components={{
+                            IndicatorSeparator: () => null,
+                            DropdownIndicator: () => null,
+                          }}
+                          styles={{
+                            control: base => ({
+                              ...base,
+                              background: "transparent",
+                              border: "none",
+                              boxShadow: "none",
+                              minHeight: "3rem",
+                              paddingLeft: 0,
+                              cursor: "text",
+                            }),
+                            valueContainer: base => ({
+                              ...base,
+                              paddingLeft: 0,
+                            }),
+                            placeholder: base => ({
+                              ...base,
+                              color: "#9ca3af",
+                              opacity: 1,
+                              cursor: "text",
+                              display: "flex",
+                              alignItems: "center",
+                            }),
+                            singleValue: base => ({
+                              ...base,
+                              color: "#fff",
+                              display: "flex",
+                              alignItems: "center",
+                            }),
+                            input: base => ({
+                              ...base,
+                              color: "#fff",
+                            }),
+                            indicatorsContainer: base => ({
+                              ...base,
+                              display: "none",
+                            }),
+                            menu: base => ({
+                              ...base,
+                              background: "#1f2937",
+                              color: "#fff",
+                              left: 0,
+                              zIndex: 1000,
+                            }),
+                            option: (base, state) => ({
+                              ...base,
+                              background: state.isSelected
+                                ? "#a78bfa"
+                                : state.isFocused
+                                ? "#4b5563"
+                                : "#1f2937",
+                              color: "#fff",
+                              display: "flex",
+                              alignItems: "center",
+                            }),
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Date Format */}
+                    <div className="mb-7">
+                      <label className="text-base font-medium text-gray-300 mb-3 block">Date format</label>
+                      <div
+                        className={`relative w-full h-12 bg-gray-800 border rounded-xl transition-colors cursor-text
+                          ${dateFormatFocused ? "border-vibe-purple-500" : "border-gray-700"}
+                        `}
+                        onClick={() => {
+                          dateFormatSelectRef.current?.focus();
+                          dateFormatSelectRef.current?.onMenuOpen?.();
+                        }}
+                      >
+                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 pointer-events-none" />
+                        <div className="absolute right-10 top-2 bottom-2 w-px bg-gray-700 z-10" />
+                        <svg
+                          className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10 cursor-pointer"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                          onClick={e => {
+                            e.stopPropagation();
+                            dateFormatSelectRef.current?.focus();
+                            dateFormatSelectRef.current?.onMenuOpen?.();
+                          }}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        <Select
+                          ref={dateFormatSelectRef}
+                          className="date-format-select w-full h-12 pl-10 pr-10 bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
+                          options={[
+                            {
+                              value: "MM-DD-YYYY",
+                              label: (
+                                <span className="flex items-center">
+                                  <Calendar className="w-5 h-5 mr-2 -mt-1 text-gray-400" />
+                                  MM-DD-YYYY
+                                </span>
+                              ),
+                            },
+                            {
+                              value: "DD-MM-YYYY",
+                              label: (
+                                <span className="flex items-center">
+                                  <Calendar className="w-5 h-5 mr-2 -mt-1 text-gray-400" />
+                                  DD-MM-YYYY
+                                </span>
+                              ),
+                            },
+                            {
+                              value: "YYYY-MM-DD",
+                              label: (
+                                <span className="flex items-center">
+                                  <Calendar className="w-5 h-5 mr-2 -mt-1 text-gray-400" />
+                                  YYYY-MM-DD
+                                </span>
+                              ),
+                            },
+                          ]}
+                          value={{
+                            value: formData.dateFormat,
+                            label: (
+                              <span className="flex items-center">
+                                {formData.dateFormat}
+                              </span>
+                            ),
+                          }}
+                          onChange={opt => handleInputChange("dateFormat", opt?.value || "")}
+                          placeholder={
+                            <span className="flex items-center">
+                              <span>Select Date Format</span>
+                            </span>
+                          }
+                          menuPlacement="top"
+                          onFocus={() => setDateFormatFocused(true)}
+                          onBlur={() => setDateFormatFocused(false)}
+                          components={{
+                            IndicatorSeparator: () => null,
+                            DropdownIndicator: () => null,
+                          }}
+                          styles={{
+                            control: base => ({
+                              ...base,
+                              background: "transparent",
+                              border: "none",
+                              boxShadow: "none",
+                              minHeight: "3rem",
+                              paddingLeft: 0,
+                              cursor: "text",
+                            }),
+                            valueContainer: base => ({
+                              ...base,
+                              paddingLeft: 0,
+                            }),
+                            placeholder: base => ({
+                              ...base,
+                              color: "#9ca3af",
+                              opacity: 1,
+                              cursor: "text",
+                              display: "flex",
+                              alignItems: "center",
+                            }),
+                            singleValue: base => ({
+                              ...base,
+                              color: "#fff",
+                              display: "flex",
+                              alignItems: "center",
+                            }),
+                            input: base => ({
+                              ...base,
+                              color: "#fff",
+                            }),
+                            indicatorsContainer: base => ({
+                              ...base,
+                              display: "none",
+                            }),
+                            menu: base => ({
+                              ...base,
+                              background: "#1f2937",
+                              color: "#fff",
+                              left: 0,
+                              zIndex: 1000,
+                            }),
+                            option: (base, state) => ({
+                              ...base,
+                              background: state.isSelected
+                                ? "#a78bfa"
+                                : state.isFocused
+                                ? "#4b5563"
+                                : "#1f2937",
+                              color: "#fff",
+                              display: "flex",
+                              alignItems: "center",
+                            }),
+                          }}
+                        />
+                      </div>
                     </div>
                   </form>
+                  {/* Navigation Buttons for Step 2 */}
+                  <div className="flex flex-row justify-between items-center gap-4 pt-4">
+                    <Button
+                      onClick={goPrevious}
+                      disabled={Number(currentStep) === 1}
+                      variant="outline"
+                      className={`h-12 border-gray-700 bg-gray-800 text-white hover:bg-gray-700 cursor-pointer ${
+                        Number(currentStep) === 1 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                      }`}
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      Previous
+                    </Button>
+                    <Button
+                      onClick={goNext}
+                      type="button"
+                      className="h-12 vibe-gradient hover:opacity-90 text-white cursor-pointer"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <span>Complete</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </div>
+                    </Button>
+                  </div>
                 </div>
               )}
 
               {/* Step 3: Goals */}
               {currentStep === 3 && (
                 <div className="p-8">
-                  <div className="text-center mb-8">
-                    <h2 className="text-2xl font-bold text-white mb-2">What brings you to VibeWealth?</h2>
-                    <p className="text-gray-400">Help us understand your financial goals and preferences</p>
+                  <div className="text-center mb-10">
+                    <h2 className="text-2xl font-bold text-white mb-4">What are your goals?</h2>
+                    <p className="text-gray-400 text-lg">Select up to 3 goals that matter most to you.</p>
                   </div>
-                  <form className="space-y-6" noValidate>
-                    <div className="space-y-3">
-                      <label className="text-sm font-medium text-gray-300">What brings you here? *</label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {[
-                          {
-                            value: "budgeting",
-                            label: "Better budgeting",
-                            icon: <PiggyBank className="w-8 h-8 text-vibe-purple-400 mb-2" />,
-                          },
-                          {
-                            value: "investing",
-                            label: "Start investing",
-                            icon: <TrendingUp className="w-8 h-8 text-vibe-purple-400 mb-2" />,
-                          },
-                          {
-                            value: "saving",
-                            label: "Save for goals",
-                            icon: <Target className="w-8 h-8 text-vibe-purple-400 mb-2" />,
-                          },
-                          {
-                            value: "learning",
-                            label: "Financial education",
-                            icon: <GraduationCap className="w-8 h-8 text-vibe-purple-400 mb-2" />,
-                          },
-                          {
-                            value: "buyHome",
-                            label: "Buy a home",
-                            icon: <Home className="w-8 h-8 text-vibe-purple-400 mb-2" />,
-                          },
-                          {
-                            value: "travel",
-                            label: "Travel & experiences",
-                            icon: <Plane className="w-8 h-8 text-vibe-purple-400 mb-2" />,
-                          },
-                          {
-                            value: "health",
-                            label: "Healthcare planning",
-                            icon: <Heart className="w-8 h-8 text-vibe-purple-400 mb-2" />,
-                          },
-                          {
-                            value: "business",
-                            label: "Start a business",
-                            icon: <Building className="w-8 h-8 text-vibe-purple-400 mb-2" />,
-                          },
-                        ].map(option => (
+                  <form className="space-y-7" noValidate>
+                    <div>
+                      <label className="text-base font-medium text-gray-300 mb-3 block">
+                        Choose your goals <span className="text-gray-400">(max 3)</span>
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        {goalOptions.map(option => (
                           <button
                             type="button"
                             key={option.value}
-                            onClick={() => handleInputChange("bringHere", option.value)}
-                            className={`flex flex-col items-start p-6 rounded-2xl border-2 transition-all w-full h-full text-left ${
-                              formData.bringHere === option.value
+                            onClick={() => handleGoalToggle(option.value)}
+                            className={`flex flex-col items-start p-6 rounded-2xl border-2 transition-all w-full h-full text-left cursor-pointer ${
+                              formData.goals.includes(option.value)
                                 ? "border-vibe-purple-400 bg-gray-700"
                                 : "border-gray-600 hover:border-vibe-purple-400 bg-gray-800"
-                            }`}
+                            } ${formData.goals.length >= 3 && !formData.goals.includes(option.value) ? "opacity-50 cursor-not-allowed" : ""}`}
+                            disabled={formData.goals.length >= 3 && !formData.goals.includes(option.value)}
                           >
                             {option.icon}
                             <span className="text-lg font-semibold text-white">{option.label}</span>
                           </button>
                         ))}
                       </div>
-                      {errors.bringHere && <p className="text-sm text-red-400">{errors.bringHere}</p>}
+                      {errors.goals && <p className="text-sm text-red-400 mt-2">{errors.goals}</p>}
+                    </div>
+                    {/* Navigation Buttons for Step 3 */}
+                    <div className="flex flex-row justify-between items-center gap-4 pt-4">
+                      <Button
+                        onClick={goPrevious}
+                        disabled={Number(currentStep) === 1}
+                        variant="outline"
+                        className={`h-12 border-gray-700 bg-gray-800 text-white hover:bg-gray-700 cursor-pointer ${
+                          Number(currentStep) === 1 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                        }`}
+                      >
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Previous
+                      </Button>
+                      <Button
+                        onClick={goNext}
+                        type="button"
+                        className="h-12 vibe-gradient hover:opacity-90 text-white cursor-pointer"
+                        disabled={formData.goals.length === 0}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span>Continue</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </div>
+                      </Button>
                     </div>
                   </form>
                 </div>
               )}
+
               {/* Step 4: Welcome */}
               {currentStep === 4 && (
                 <div className="p-8 text-center">
@@ -666,10 +1421,10 @@ export default function Onboarding() {
                   </motion.div>
                   <h2 className="text-3xl font-bold text-white mb-4">Welcome to VibeWealth!</h2>
                   <p className="text-gray-400 mb-2">
-                    Hey {formData.firstName}! You\&apos;re all set to start your financial journey.
+                    Hey {formData.firstName}! You&apos;re all set to start your financial journey.
                   </p>
                   <p className="text-gray-400 mb-8">
-                    Let\&apos;s help you achieve your goals and build the wealth you deserve.
+                    Let&apos;s help you achieve your goals and build the wealth you deserve.
                   </p>
                   <div className="bg-gray-700 rounded-xl p-6 mb-8">
                     <h3 className="text-white font-medium mb-4">Your Journey Starts With:</h3>
@@ -692,41 +1447,32 @@ export default function Onboarding() {
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
-
-              {/* Navigation Buttons */}
-              <div className="px-8 pb-8">
-                <div className="flex justify-between items-center">
-                  <Button
-                    onClick={goPrevious}
-                    disabled={currentStep === 1}
-                    variant="outline"
-                    className={`border-gray-700 bg-gray-800 text-white hover:bg-gray-700 ${
-                      currentStep === 1 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-                    }`}
-                  >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Previous
-                  </Button>
-                  <Button
-                    onClick={goNext}
-                    className="vibe-gradient hover:opacity-90 text-white cursor-pointer"
-                  >
-                    {currentStep === 4 ? (
+                  {/* Navigation Buttons for Step 4 */}
+                  <div className="flex flex-row justify-between items-center gap-4 pt-4">
+                    <Button
+                      onClick={goPrevious}
+                      disabled={Number(currentStep) === 1}
+                      variant="outline"
+                      className={`h-12 border-gray-700 bg-gray-800 text-white hover:bg-gray-700 cursor-pointer ${
+                        Number(currentStep) === 1 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                      }`}
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      Previous
+                    </Button>
+                    <Button
+                      onClick={goNext}
+                      type="button"
+                      className="h-12 vibe-gradient hover:opacity-90 text-white cursor-pointer"
+                    >
                       <div className="flex items-center space-x-2">
                         <span>Get Started</span>
                         <Sparkles className="w-4 h-4" />
                       </div>
-                    ) : (
-                      <div className="flex items-center space-x-2">
-                        <span>{currentStep === 2 ? "Complete" : "Continue"}</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </div>
-                    )}
-                  </Button>
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
             </motion.div>
           </AnimatePresence>
         </motion.div>

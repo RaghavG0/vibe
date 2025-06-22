@@ -321,17 +321,24 @@ export default function ForgotPassword() {
 
       {/* Right side - Form */}
       <div className="w-full lg:w-1/2 flex flex-col">
-        {/* Mobile header */}
-        <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-2 px-4 py-4 border-b border-gray-800 text-sm text-gray-400 text-center sm:text-left">
-          <Link href="/" className="flex items-center space-x-2 hover:text-white">
+        {/* Header: mobile = stacked, desktop = row */}
+        <div className="flex w-full justify-between items-center px-4 py-4 border-b border-gray-800 text-sm text-gray-400">
+          {/* Left: Back to home */}
+          <Link
+            href="/"
+            className="flex items-center space-x-2 hover:text-white"
+            style={{ minWidth: 0 }}
+          >
             <ArrowLeft className="w-5 h-5" />
             <span>Back to home</span>
           </Link>
-          <div className="flex items-center space-x-2">
-            <span>Remember your password?</span>
+          {/* Right: Account group, stacked on mobile, row on desktop */}
+          <div className="flex flex-col items-end justify-center sm:flex-row sm:items-center sm:space-x-3 sm:space-y-0 space-y-1">
+            <span className="text-gray-400 text-sm">Remember your password?</span>
             <button
               onClick={goToLogin}
-              className="text-vibe-purple-400 hover:text-vibe-purple-300 font-medium cursor-pointer"
+              className="text-vibe-purple-400 hover:text-vibe-purple-300 font-medium cursor-pointer mt-1 sm:mt-0"
+              style={{ lineHeight: 1 }}
             >
               Sign In
             </button>
