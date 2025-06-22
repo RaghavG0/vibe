@@ -165,23 +165,23 @@ export default function SignUp() {
   };
 
   const WeakPasswordToast = () =>
-      showPasswordRecommendationPopup ? (
-        <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50">
-          <div className="flex items-center bg-vibe-gray-800 border border-vibe-purple-500 text-white px-6 py-3 rounded-xl shadow-lg space-x-3 max-w-md">
-            <span className="text-xl">⚠️</span>
-            <span className="flex-1">
-              Your password could be stronger. If you still want to use this password, press ‘Update Password’ again.
-            </span>
-            <button
-              onClick={() => setShowPasswordRecommendationPopup(false)}
-              className="ml-4 text-gray-400 hover:text-white focus:outline-none cursor-pointer"
-              aria-label="Close"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+    showPasswordRecommendationPopup ? (
+      <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50 w-[90vw] max-w-xs sm:max-w-md">
+        <div className="flex flex-col items-center sm:flex-row sm:items-center bg-vibe-gray-800 border border-vibe-purple-500 text-white px-4 py-3 sm:px-6 sm:py-3 rounded-xl shadow-lg space-y-3 sm:space-y-0 sm:space-x-3">
+          <span className="text-2xl sm:text-xl">⚠️</span>
+          <span className="flex-1 text-sm sm:text-base text-center sm:text-left leading-snug">
+            Your password could be stronger. If you still want to use this password, press ‘Create Account’ again.
+          </span>
+          <button
+            onClick={() => setShowPasswordRecommendationPopup(false)}
+            className="text-gray-400 hover:text-white focus:outline-none cursor-pointer self-center sm:self-auto"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
-      ) : null;  
+      </div>
+    ) : null;
 
   return (
     <div className="min-h-screen bg-gray-900 flex">
@@ -256,7 +256,7 @@ export default function SignUp() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-center justify-between p-6 border-b border-gray-800 text-sm text-center sm:text-left">
           <div className="flex w-full justify-between items-center">
-            {/* Left: Back to home, vertically centered with right group */}
+            {/* Left: Back to home */}
             <Link
               href="/"
               className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
@@ -265,15 +265,15 @@ export default function SignUp() {
               <ArrowLeft className="w-5 h-5" />
               <span>Back to home</span>
             </Link>
-            {/* Right: Account group, stacked */}
-            <div className="flex flex-col items-end justify-center">
+            {/* Right: Account group, row on desktop, stacked on mobile */}
+            <div className="flex flex-col items-end justify-center sm:flex-row sm:items-center sm:space-x-2 sm:space-y-0 space-y-1">
               <span className="text-gray-400 text-sm">Already have an account?</span>
               <button
                 onClick={() => {
                   router.push("/");
                   localStorage.setItem("openLogin", "true");
                 }}
-                className="text-vibe-purple-400 hover:text-vibe-purple-300 font-medium cursor-pointer mt-1"
+                className="text-vibe-purple-400 hover:text-vibe-purple-300 font-medium cursor-pointer mt-1 sm:mt-0"
                 style={{ lineHeight: 1 }}
               >
                 Sign In

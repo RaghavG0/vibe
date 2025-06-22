@@ -403,15 +403,15 @@ export default function Onboarding() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -50, scale: 0.9 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50"
+            className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 w-[95vw] max-w-xs sm:max-w-sm"
           >
-            <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl px-6 py-4 flex items-center space-x-3 max-w-sm">
-              <div className="relative">
-                <CheckCircle2 className="w-6 h-6 text-vibe-mint-400" />
+            <div className="flex flex-col items-center sm:flex-row sm:items-center bg-gray-800 border border-gray-700 rounded-xl shadow-2xl px-4 py-4 sm:px-6 sm:py-4 space-y-2 sm:space-y-0 sm:space-x-3">
+              <div className="relative mb-2 sm:mb-0">
+                <CheckCircle2 className="w-7 h-7 text-vibe-mint-400" />
               </div>
-              <div>
-                <p className="text-white font-medium">Signed up successfully!</p>
-                <p className="text-gray-400 text-sm">Welcome to VibeWealth</p>
+              <div className="text-center sm:text-left">
+                <p className="text-white font-medium text-sm sm:text-base">Signed up successfully!</p>
+                <p className="text-gray-400 text-xs sm:text-sm">Welcome to VibeWealth</p>
               </div>
             </div>
           </motion.div>
@@ -500,7 +500,7 @@ export default function Onboarding() {
                             value={formData.firstName}
                             onChange={e => handleInputChange("firstName", e.target.value)}
                             placeholder="First Name"
-                            className={`w-full pl-10 pr-4 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all cursor-pointer ${
+                            className={`w-full pl-10 pr-4 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
                               errors.firstName
                                 ? "border-red-500 focus:ring-red-500"
                                 : "border-gray-700 focus:ring-vibe-purple-500 focus:border-transparent"
@@ -519,7 +519,7 @@ export default function Onboarding() {
                             value={formData.lastName}
                             onChange={e => handleInputChange("lastName", e.target.value)}
                             placeholder="Last Name"
-                            className={`w-full pl-10 pr-4 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all cursor-pointer ${
+                            className={`w-full pl-10 pr-4 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
                               errors.lastName
                                 ? "border-red-500 focus:ring-red-500"
                                 : "border-gray-700 focus:ring-vibe-purple-500 focus:border-transparent"
@@ -539,7 +539,7 @@ export default function Onboarding() {
                           value={formData.userName}
                           onChange={e => handleInputChange("userName", e.target.value)}
                           placeholder="User Name"
-                          className={`w-full pl-10 pr-4 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all cursor-pointer ${
+                          className={`w-full pl-10 pr-4 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
                             errors.userName
                               ? "border-red-500 focus:ring-red-500"
                               : "border-gray-700 focus:ring-vibe-purple-500 focus:border-transparent"
@@ -596,6 +596,8 @@ export default function Onboarding() {
                               }}
                               onCalendarOpen={() => setDobOpen(true)}
                               onCalendarClose={() => setDobOpen(false)}
+                              popperPlacement="top"
+                              popperClassName="datepicker-center-popper"
                             />
                           </div>
                           {errors.dob && <p className="text-sm text-red-400 mt-2">{errors.dob}</p>}
@@ -690,10 +692,14 @@ export default function Onboarding() {
                                 ...base,
                                 display: "none",
                               }),
-                              menu: (base) => ({
+                              menu: base => ({
                                 ...base,
                                 background: "#1f2937",
                                 color: "#fff",
+                                left: 0,
+                                marginLeft: 0, // ensure no offset
+                                width: "100%", // make dropdown as wide as the input
+                                zIndex: 1000,
                               }),
                               option: (base, state) => ({
                                 ...base,
@@ -749,11 +755,11 @@ export default function Onboarding() {
                     <div className="flex flex-col items-center mb-4">
                       <h3 className="text-white font-medium mb-2">Example account</h3>
                       <div className="text-2xl font-bold text-white truncate">
-                        {getCurrencySymbol(formData.currency) } 
+                        {getCurrencySymbol(formData.currency)}{" "}
                         2,325.25
                       </div>
                       <div className="text-sm text-vibe-mint-400">
-                        +{getCurrencySymbol(formData.currency) }78.90 (+3.39) as of {formatDate(new Date("2024-10-23"), formData.dateFormat, formData.language)}
+                        + {getCurrencySymbol(formData.currency)} 78.90 (+3.39) as of {formatDate(new Date("2024-10-23"), formData.dateFormat, formData.language)}
                       </div>
                     </div>
                     <div className="text-base text-gray-400 mb-2">
@@ -768,7 +774,7 @@ export default function Onboarding() {
                     <div className="mb-7">
                       <label className="text-base font-medium text-gray-300 mb-3 block">Color theme</label>
                       <div
-                        className={`relative w-full h-12 bg-gray-800 border rounded-xl transition-colors cursor-text
+                        className={`relative w-full h-12 bg-gray-800 border rounded-xl transition-colors cursor-pointer
                           ${colorThemeFocused ? "border-vibe-purple-500" : "border-gray-700"}
                         `}
                         onClick={() => {
@@ -795,6 +801,7 @@ export default function Onboarding() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                         </svg>
                         <Select
+                          classNamePrefix="react-select"
                           ref={colorThemeSelectRef}
                           className="color-theme-select w-full h-12 pl-10 pr-10 bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
                           options={[
@@ -854,7 +861,7 @@ export default function Onboarding() {
                               boxShadow: "none",
                               minHeight: "3rem",
                               paddingLeft: 0,
-                              cursor: "text",
+                              cursor: "pointer",
                             }),
                             valueContainer: base => ({
                               ...base,
@@ -864,7 +871,7 @@ export default function Onboarding() {
                               ...base,
                               color: "#9ca3af",
                               opacity: 1,
-                              cursor: "text",
+                              cursor: "pointer",
                               display: "flex",
                               alignItems: "center",
                             }),
@@ -909,7 +916,7 @@ export default function Onboarding() {
                     <div className="mb-7">
                       <label className="text-base font-medium text-gray-300 mb-3 block">Language</label>
                       <div
-                        className={`relative w-full h-12 bg-gray-800 border rounded-xl transition-colors cursor-text
+                        className={`relative w-full h-12 bg-gray-800 border rounded-xl transition-colors cursor-pointer
                           ${languageFocused ? "border-vibe-purple-500" : "border-gray-700"}
                         `}
                         onClick={() => {
@@ -935,6 +942,7 @@ export default function Onboarding() {
                         </svg>
                         <Select
                           ref={languageSelectRef}
+                          classNamePrefix="react-select"
                           className="language-select w-full h-12 pl-10 pr-10 bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
                           options={[
                             {
@@ -1002,7 +1010,7 @@ export default function Onboarding() {
                               boxShadow: "none",
                               minHeight: "3rem",
                               paddingLeft: 0,
-                              cursor: "text",
+                              cursor: "pointer",
                             }),
                             valueContainer: base => ({
                               ...base,
@@ -1012,7 +1020,7 @@ export default function Onboarding() {
                               ...base,
                               color: "#9ca3af",
                               opacity: 1,
-                              cursor: "text",
+                              cursor: "pointer",
                               display: "flex",
                               alignItems: "center",
                             }),
@@ -1057,7 +1065,7 @@ export default function Onboarding() {
                     <div className="mb-7">
                       <label className="text-base font-medium text-gray-300 mb-3 block">Currency</label>
                       <div
-                        className={`relative w-full h-12 bg-gray-800 border rounded-xl transition-colors cursor-text
+                        className={`relative w-full h-12 bg-gray-800 border rounded-xl transition-colors cursor-pointer
                           ${currencyFocused ? "border-vibe-purple-500" : "border-gray-700"}
                         `}
                         onClick={() => {
@@ -1084,6 +1092,7 @@ export default function Onboarding() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                         </svg>
                         <Select
+                          classNamePrefix="react-select"
                           ref={currencySelectRef}
                           className="currency-select w-full h-12 pl-10 pr-10 bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
                           options={currencyOptions.map(c => ({
@@ -1129,7 +1138,7 @@ export default function Onboarding() {
                               boxShadow: "none",
                               minHeight: "3rem",
                               paddingLeft: 0,
-                              cursor: "text",
+                              cursor: "pointer",
                             }),
                             valueContainer: base => ({
                               ...base,
@@ -1139,7 +1148,7 @@ export default function Onboarding() {
                               ...base,
                               color: "#9ca3af",
                               opacity: 1,
-                              cursor: "text",
+                              cursor: "pointer",
                               display: "flex",
                               alignItems: "center",
                             }),
@@ -1184,7 +1193,7 @@ export default function Onboarding() {
                     <div className="mb-7">
                       <label className="text-base font-medium text-gray-300 mb-3 block">Date format</label>
                       <div
-                        className={`relative w-full h-12 bg-gray-800 border rounded-xl transition-colors cursor-text
+                        className={`relative w-full h-12 bg-gray-800 border rounded-xl transition-colors cursor-pointer
                           ${dateFormatFocused ? "border-vibe-purple-500" : "border-gray-700"}
                         `}
                         onClick={() => {
@@ -1209,6 +1218,7 @@ export default function Onboarding() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                         </svg>
                         <Select
+                          classNamePrefix="react-select"
                           ref={dateFormatSelectRef}
                           className="date-format-select w-full h-12 pl-10 pr-10 bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
                           options={[
@@ -1269,7 +1279,7 @@ export default function Onboarding() {
                               boxShadow: "none",
                               minHeight: "3rem",
                               paddingLeft: 0,
-                              cursor: "text",
+                              cursor: "pointer",
                             }),
                             valueContainer: base => ({
                               ...base,
@@ -1279,7 +1289,7 @@ export default function Onboarding() {
                               ...base,
                               color: "#9ca3af",
                               opacity: 1,
-                              cursor: "text",
+                              cursor: "pointer",
                               display: "flex",
                               alignItems: "center",
                             }),

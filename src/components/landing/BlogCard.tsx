@@ -1,3 +1,4 @@
+// src/components/BlogCard.tsx
 import { Clock, ArrowRight } from "lucide-react";
 import Image from "next/image";
 
@@ -52,5 +53,5 @@ export function BlogCard({ post }: { post: BlogPost }) {
         </div>
       </div>
     </div>
-  );
+  )
 }

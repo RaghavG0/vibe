@@ -208,15 +208,15 @@ export default function ForgotPassword() {
   // Place this just before the main return
   const WeakPasswordToast = () =>
     showWeakPasswordWarning ? (
-      <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50">
-        <div className="flex items-center bg-vibe-gray-800 border border-vibe-purple-500 text-white px-6 py-3 rounded-xl shadow-lg space-x-3 max-w-md">
-          <span className="text-xl">⚠️</span>
-          <span className="flex-1">
-            Your password could be stronger. If you still want to use this password, press ‘Update Password’ again.
+      <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50 w-[90vw] max-w-xs sm:max-w-md">
+        <div className="flex flex-col items-center sm:flex-row sm:items-center bg-vibe-gray-800 border border-vibe-purple-500 text-white px-4 py-3 sm:px-6 sm:py-3 rounded-xl shadow-lg space-y-3 sm:space-y-0 sm:space-x-3">
+          <span className="text-2xl sm:text-xl">⚠️</span>
+          <span className="flex-1 text-sm sm:text-base text-center sm:text-left leading-snug">
+            Your password could be stronger. If you still want to use this password, press &apos;Update Password&apos; again.
           </span>
           <button
             onClick={() => setShowWeakPasswordWarning(false)}
-            className="ml-4 text-gray-400 hover:text-white focus:outline-none cursor-pointer"
+            className="text-gray-400 hover:text-white focus:outline-none cursor-pointer self-center sm:self-auto"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
