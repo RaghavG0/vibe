@@ -41,7 +41,6 @@ export default function Home() {
         <FinalCTA />
         <Footer />
       </main>
-
       {/* Login modal */}
       <LoginModal
         isOpen={isLoginModalOpen}

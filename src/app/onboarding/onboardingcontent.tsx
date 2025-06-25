@@ -10,6 +10,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import getSymbolFromCurrency from "currency-symbol-map";
 import currencyList from "currency-list";
 import countries from "world-countries";
+import { usePathname } from "next/navigation";
 import type { GroupBase, SelectInstance } from "react-select";
 import {
   User,
@@ -171,6 +172,12 @@ export default function Onboarding() {
     if (signupSuccess === "success") {
       setShowSuccessPopup(true);
       const timer = setTimeout(() => setShowSuccessPopup(false), 4000);
+
+      // Remove the signup param from the URL (shallow routing)
+      const url = new URL(window.location.href);
+      url.searchParams.delete("signup");
+      window.history.replaceState({}, document.title, url.pathname + url.search);
+
       return () => clearTimeout(timer);
     }
   }, [searchParams]);
@@ -190,6 +197,16 @@ export default function Onboarding() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const pathname = usePathname();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [pathname]);
 
   // Validation functions
   const validateStep1 = () => {
@@ -363,9 +380,9 @@ export default function Onboarding() {
   const dateFormatSelectRef = useRef<SelectInstance<{ value: string; label: React.ReactNode }, false, GroupBase<{ value: string; label: React.ReactNode }>>>(null);
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen w-full bg-gray-900 overflow-x-hidden overflow-y-auto">
       {/* Header */}
-      <div className="relative h-[72px] border-b border-gray-800 flex items-center justify-center bg-gray-900">
+      <div className="relative h-[72px] border-b border-gray-800 flex items-center justify-center bg-gray-900 w-full">
         {/* Left: Back to home */}
         <div className="absolute left-6 top-1/2 -translate-y-1/2">
           <button
@@ -403,7 +420,7 @@ export default function Onboarding() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -50, scale: 0.9 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 w-[95vw] max-w-xs sm:max-w-sm"
+            className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs sm:max-w-sm"
           >
             <div className="flex flex-col items-center sm:flex-row sm:items-center bg-gray-800 border border-gray-700 rounded-xl shadow-2xl px-4 py-4 sm:px-6 sm:py-4 space-y-2 sm:space-y-0 sm:space-x-3">
               <div className="relative mb-2 sm:mb-0">
@@ -419,12 +436,12 @@ export default function Onboarding() {
       </AnimatePresence>
 
       {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center p-6">
+      <div className="flex-1 flex items-center justify-center p-6 relative w-full">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="w-full max-w-2xl"
+          className="w-full max-w-2xl mx-auto"
         >
           <StepIndicator />
 
@@ -440,7 +457,7 @@ export default function Onboarding() {
             >
               {/* Step 1: Personal Info */}
               {currentStep === 1 && (
-                <div className="p-8">
+                <div className="p-4 sm:p-8 ">
                   <div className="text-center mb-10">
                     <h2 className="text-3xl font-bold text-white mb-4">
                       Let&apos;s set up your account
@@ -492,7 +509,7 @@ export default function Onboarding() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                       {/* First Name */}
                       <div>
-                        <label className="text-base font-medium text-gray-300 mb-3 block">First Name</label>
+                        <label className="text-base font-medium text-gray-300 block">First Name</label>
                         <div className="relative">
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                           <input
@@ -511,7 +528,7 @@ export default function Onboarding() {
                       </div>
                       {/* Last Name */}
                       <div>
-                        <label className="text-base font-medium text-gray-300 mb-3 block">Last Name</label>
+                        <label className="text-base font-medium text-gray-300 block">Last Name</label>
                         <div className="relative">
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                           <input
@@ -531,7 +548,7 @@ export default function Onboarding() {
                     </div>
                     {/* User Name */}
                     <div>
-                      <label className="text-base font-medium text-gray-300 mb-3 block">User Name</label>
+                      <label className="text-base font-medium text-gray-300 block">User Name</label>
                       <div className="relative">
                         <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                         <input
@@ -552,7 +569,7 @@ export default function Onboarding() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {/* Date of Birth */}
                       <div className="mb-7">
-                          <label className="text-base font-medium text-gray-300 mb-3 block">
+                          <label className="text-base font-medium text-gray-300 block">
                             Date of Birth
                           </label>
                           <div
@@ -604,7 +621,7 @@ export default function Onboarding() {
                       </div>
                       {/* Country */}
                       <div className="mb-7">
-                        <label className="text-base font-medium text-gray-300 mb-3 block">Country</label>
+                        <label className="text-base font-medium text-gray-300 block">Country</label>
                         <div
                           className={`relative w-full h-12 bg-gray-800 border rounded-xl transition-colors cursor-text
                             ${countryFocused ? "border-vibe-purple-500" : "border-gray-700"}
@@ -745,7 +762,7 @@ export default function Onboarding() {
 
               {/* Step 2: Preferences */}
               {currentStep === 2 && (
-                <div className="p-8">
+                <div className="p-4 sm:p-8">
                   <div className="text-center mb-10">
                     <h2 className="text-2xl font-bold text-white mb-4">Configure your preferences</h2>
                     <p className="text-gray-400 text-lg">Let&apos;s configure your preferences.</p>
@@ -772,7 +789,7 @@ export default function Onboarding() {
                   <form className="space-y-7" noValidate>
                     {/* Color Theme */}
                     <div className="mb-7">
-                      <label className="text-base font-medium text-gray-300 mb-3 block">Color theme</label>
+                      <label className="text-base font-medium text-gray-300 block">Color theme</label>
                       <div
                         className={`relative w-full h-12 bg-gray-800 border rounded-xl transition-colors cursor-pointer
                           ${colorThemeFocused ? "border-vibe-purple-500" : "border-gray-700"}
@@ -914,7 +931,7 @@ export default function Onboarding() {
 
                     {/* Language */}
                     <div className="mb-7">
-                      <label className="text-base font-medium text-gray-300 mb-3 block">Language</label>
+                      <label className="text-base font-medium text-gray-300 block">Language</label>
                       <div
                         className={`relative w-full h-12 bg-gray-800 border rounded-xl transition-colors cursor-pointer
                           ${languageFocused ? "border-vibe-purple-500" : "border-gray-700"}
@@ -1063,7 +1080,7 @@ export default function Onboarding() {
 
                     {/* Currency */}
                     <div className="mb-7">
-                      <label className="text-base font-medium text-gray-300 mb-3 block">Currency</label>
+                      <label className="text-base font-medium text-gray-300 block">Currency</label>
                       <div
                         className={`relative w-full h-12 bg-gray-800 border rounded-xl transition-colors cursor-pointer
                           ${currencyFocused ? "border-vibe-purple-500" : "border-gray-700"}
@@ -1191,7 +1208,7 @@ export default function Onboarding() {
 
                     {/* Date Format */}
                     <div className="mb-7">
-                      <label className="text-base font-medium text-gray-300 mb-3 block">Date format</label>
+                      <label className="text-base font-medium text-gray-300 block">Date format</label>
                       <div
                         className={`relative w-full h-12 bg-gray-800 border rounded-xl transition-colors cursor-pointer
                           ${dateFormatFocused ? "border-vibe-purple-500" : "border-gray-700"}
@@ -1359,14 +1376,14 @@ export default function Onboarding() {
 
               {/* Step 3: Goals */}
               {currentStep === 3 && (
-                <div className="p-8">
+                <div className="p-4 sm:p-8">
                   <div className="text-center mb-10">
                     <h2 className="text-2xl font-bold text-white mb-4">What are your goals?</h2>
                     <p className="text-gray-400 text-lg">Select up to 3 goals that matter most to you.</p>
                   </div>
                   <form className="space-y-7" noValidate>
                     <div>
-                      <label className="text-base font-medium text-gray-300 mb-3 block">
+                      <label className="text-base font-medium text-gray-300 block">
                         Choose your goals <span className="text-gray-400">(max 3)</span>
                       </label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -1420,7 +1437,7 @@ export default function Onboarding() {
 
               {/* Step 4: Welcome */}
               {currentStep === 4 && (
-                <div className="p-8 text-center">
+                <div className="p-4 sm:p-8 text-center">
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}

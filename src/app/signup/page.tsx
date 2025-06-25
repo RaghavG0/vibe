@@ -184,7 +184,7 @@ export default function SignUp() {
     ) : null;
 
   return (
-    <div className="min-h-screen bg-gray-900 flex">
+    <div className="min-h-screen w-screen overflow-hidden bg-gray-900 flex">
       <WeakPasswordToast />
       {/* Left Side - Branding */}
       <motion.div
@@ -252,7 +252,7 @@ export default function SignUp() {
       </motion.div>
 
       {/* Right Side - Sign Up Form */}
-      <div className="w-full lg:w-1/2 flex flex-col">
+      <div className="w-full lg:w-1/2 flex flex-col h-screen overflow-hidden">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-center justify-between p-6 border-b border-gray-800 text-sm text-center sm:text-left">
           <div className="flex w-full justify-between items-center">
@@ -283,7 +283,7 @@ export default function SignUp() {
         </div>
 
         {/* Form */}
-        <div className="flex-1 flex items-center justify-center p-6">
+        <div className="flex-1 overflow-y-auto p-6 flex items-start justify-center pt-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -536,6 +536,15 @@ export default function SignUp() {
                     checked={formData.agreeToTerms}
                     onChange={handleInputChange}
                     className="mt-1 w-4 h-4 text-vibe-purple-500 bg-gray-800 border-gray-600 rounded focus:ring-vibe-purple-500 focus:ring-2 cursor-pointer"
+                    onKeyDown={e => {
+                      if (e.key === "Enter" || e.key === "Return") {
+                        e.preventDefault();
+                        setFormData(prev => ({
+                          ...prev,
+                          agreeToTerms: !prev.agreeToTerms,
+                        }));
+                      }
+                    }}
                   />
                   <label className="text-sm text-gray-300">
                     I agree to the{" "}
@@ -565,6 +574,15 @@ export default function SignUp() {
                     checked={formData.newsletter}
                     onChange={handleInputChange}
                     className="mt-1 w-4 h-4 text-vibe-purple-500 bg-gray-800 border-gray-600 rounded focus:ring-vibe-purple-500 focus:ring-2 cursor-pointer"
+                    onKeyDown={e => {
+                      if (e.key === "Enter" || e.key === "Return") {
+                        e.preventDefault();
+                        setFormData(prev => ({
+                          ...prev,
+                          newsletter: !prev.newsletter,
+                        }));
+                      }
+                    }}
                   />
                   <label className="text-sm text-gray-300">
                     Send me updates about new features and financial tips
