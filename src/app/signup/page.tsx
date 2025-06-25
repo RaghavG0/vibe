@@ -112,9 +112,14 @@ export default function SignUp() {
     }
 
     // Only show toast if there are no password errors so far
+    // Terms agreement
+    if (!formData.agreeToTerms) {
+      newErrors.agreeToTerms =
+        "You must agree to the Terms of Service and Privacy Policy to create an account";
+    }
+    
     if (
-      !newErrors.password &&
-      !newErrors.confirmPassword &&
+      Object.keys(newErrors).length === 0 &&
       passwordStrength.score < passwordRequirements.length &&
       !showPasswordRecommendationPopup &&
       !hasShownPasswordRecommendation
@@ -122,11 +127,6 @@ export default function SignUp() {
       setShowPasswordRecommendationPopup(true);
       setHasShownPasswordRecommendation(true);
       return false;
-    }
-    // Terms agreement
-    if (!formData.agreeToTerms) {
-      newErrors.agreeToTerms =
-        "You must agree to the Terms of Service and Privacy Policy to create an account";
     }
 
     setErrors(newErrors);

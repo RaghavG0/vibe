@@ -167,20 +167,26 @@ export default function Onboarding() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentStep]);
 
+  // Show the popup when signup=success
   useEffect(() => {
     const signupSuccess = searchParams.get("signup");
     if (signupSuccess === "success") {
       setShowSuccessPopup(true);
-      const timer = setTimeout(() => setShowSuccessPopup(false), 4000);
 
       // Remove the signup param from the URL (shallow routing)
       const url = new URL(window.location.href);
       url.searchParams.delete("signup");
       window.history.replaceState({}, document.title, url.pathname + url.search);
-
-      return () => clearTimeout(timer);
     }
   }, [searchParams]);
+
+  // Hide the popup after 2.5s whenever it is shown
+  useEffect(() => {
+    if (showSuccessPopup) {
+      const timer = setTimeout(() => setShowSuccessPopup(false), 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessPopup]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -566,9 +572,9 @@ export default function Onboarding() {
                       {errors.userName && <p className="text-sm text-red-400 mt-2">{errors.userName}</p>}
                     </div>
                     {/* Date of Birth & Country */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                       {/* Date of Birth */}
-                      <div className="mb-7">
+                      <div>
                           <label className="text-base font-medium text-gray-300 block">
                             Date of Birth
                           </label>
@@ -620,7 +626,7 @@ export default function Onboarding() {
                           {errors.dob && <p className="text-sm text-red-400 mt-2">{errors.dob}</p>}
                       </div>
                       {/* Country */}
-                      <div className="mb-7">
+                      <div>
                         <label className="text-base font-medium text-gray-300 block">Country</label>
                         <div
                           className={`relative w-full h-12 bg-gray-800 border rounded-xl transition-colors cursor-text

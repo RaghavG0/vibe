@@ -320,7 +320,7 @@ export default function ForgotPassword() {
       </motion.div>
 
       {/* Right side - Form */}
-      <div className="w-full lg:w-1/2 flex flex-col">
+      <div className="w-full lg:w-1/2 flex flex-col min-h-screen">
         {/* Header: mobile = stacked, desktop = row */}
         <div className="flex w-full justify-between items-center px-4 py-4 border-b border-gray-800 text-sm text-gray-400">
           {/* Left: Back to home */}
@@ -346,7 +346,7 @@ export default function ForgotPassword() {
         </div>
 
         {/* Form content */}
-        <div className="flex-1 flex items-center justify-center px-4 py-6 min-h-[calc(100vh-64px)]">
+        <div className="flex-1 flex items-center justify-center px-4 py-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
