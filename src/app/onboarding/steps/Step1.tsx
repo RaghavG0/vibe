@@ -341,14 +341,14 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
               />
               {countryMenuOpen && (
                 <ul
-                  className="absolute bottom-full mb-2 w-full rounded-xl bg-[#23293a] border border-gray-700 shadow-2xl z-50 max-h-60 overflow-auto py-1 text-base focus:outline-none sm:text-sm"
-                  style={{
-                    touchAction: "pan-y",
-                    WebkitOverflowScrolling: "touch",
-                    overscrollBehavior: "contain",
-                    padding: 0, // Remove default ul padding for symmetry
-                  }}
-                >
+                className="absolute bottom-full mb-2 w-full rounded-xl bg-[#23293a] border border-gray-700 shadow-2xl z-50 max-h-80 overflow-y-auto py-1 text-base focus:outline-none sm:text-sm"
+                style={{
+                  touchAction: "pan-y",
+                  WebkitOverflowScrolling: "touch",
+                  overscrollBehavior: "contain",
+                  padding: 0,
+                }}
+              >
                   {filteredCountries.length === 0 && (
                     <li className="text-gray-400 px-4 py-2">No countries found</li>
                   )}

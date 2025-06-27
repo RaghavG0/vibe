@@ -22,11 +22,10 @@ import {
   getCurrencySymbol,
   formatDate,
 } from "./utils";
-import type { SelectInstance, GroupBase } from "react-select";
+import type { SelectInstance } from "react-select";
 import DatePicker from "react-datepicker";
 
 type CountryOptionType = { value: string; label: string };
-type OptionType = { value: string; label: React.ReactNode };
 
 export default function OnboardingContent() {
   const router = useRouter();
@@ -61,18 +60,10 @@ export default function OnboardingContent() {
   const dobWrapperRef = useRef<HTMLDivElement>(null);
   const countrySelectRef = useRef<SelectInstance<CountryOptionType, false> | null>(null);
   const datePickerRef = useRef<DatePicker | null>(null);
-  const colorThemeSelectRef = useRef<SelectInstance<OptionType, false, GroupBase<OptionType>> | null>(null);
-  const languageSelectRef = useRef<SelectInstance<OptionType, false, GroupBase<OptionType>> | null>(null);
-  const currencySelectRef = useRef<SelectInstance<OptionType, false, GroupBase<OptionType>> | null>(null);
-  const dateFormatSelectRef = useRef<SelectInstance<OptionType, false, GroupBase<OptionType>> | null>(null);
 
   // --- Focus handlers for selects and datepicker (custom hook) ---
   const dobFocus = useFocusHandlers();
   const countryFocus = useFocusHandlers();
-  const colorThemeFocus = useFocusHandlers();
-  const languageFocus = useFocusHandlers();
-  const currencyFocus = useFocusHandlers();
-  const dateFormatFocus = useFocusHandlers();
 
   // --- Validation functions for each step ---
   const validateStep1 = () => {
@@ -247,18 +238,6 @@ export default function OnboardingContent() {
                   handleInputChange={handleInputChange}
                   goPrevious={goPrevious}
                   goNext={goNext}
-                  colorThemeSelectRef={colorThemeSelectRef}
-                  languageSelectRef={languageSelectRef}
-                  currencySelectRef={currencySelectRef}
-                  dateFormatSelectRef={dateFormatSelectRef}
-                  colorThemeFocused={colorThemeFocus.focused}
-                  setColorThemeFocused={colorThemeFocus.setFocused}
-                  languageFocused={languageFocus.focused}
-                  setLanguageFocused={languageFocus.setFocused}
-                  currencyFocused={currencyFocus.focused}
-                  setCurrencyFocused={currencyFocus.setFocused}
-                  dateFormatFocused={dateFormatFocus.focused}
-                  setDateFormatFocused={dateFormatFocus.setFocused}
                   currencyOptions={currencyOptions}
                   languageMap={languageMap}
                   getCurrencySymbol={getCurrencySymbol}
