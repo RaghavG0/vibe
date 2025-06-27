@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
+// App-wide metadata
 export const metadata: Metadata = {
   title: "VibeWealth",
   description: "Your Finance Dashboard",
 };
 
+// Root layout for all pages
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -14,7 +16,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body className="min-h-screen overflow-x-hidden">
+        {/* Global toast notifications */}
         <Toaster
           position="top-center"
           toastOptions={{
@@ -39,8 +42,11 @@ export default function RootLayout({
             },
           }}
         />
-        {children}
+        {/* Page content */}
+        <div className="w-full overflow-x-hidden">
+          {children}
+        </div>
       </body>
     </html>
-  );
+  )
 }

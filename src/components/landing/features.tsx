@@ -1,4 +1,3 @@
-// src/components/features.tsx
 "use client";
 
 import { motion } from "framer-motion";
@@ -83,13 +82,52 @@ const itemVariants = {
   },
 };
 
+// --- FeatureCard component for breaking up ---
+function FeatureCard({
+  icon: Icon,
+  title,
+  description,
+  gradient,
+}: {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  gradient: string;
+}) {
+  return (
+    <motion.div
+      variants={itemVariants}
+      whileHover={{ scale: 1.05 }}
+      className="group bg-white rounded-2xl p-8 shadow-lg border border-vibe-gray-100 hover:shadow-xl hover:border-vibe-purple-200 transition-all duration-300 relative overflow-hidden"
+    >
+      {/* Hover background effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-transparent to-vibe-gray-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+      <div className="relative z-10">
+        {/* Feature icon */}
+        <div
+          className={`w-14 h-14 rounded-xl bg-gradient-to-r ${gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
+        >
+          <Icon className="w-7 h-7 text-white" />
+        </div>
+
+        {/* Feature content */}
+        <h3 className="text-xl font-bold text-vibe-gray-800 mb-3 group-hover:text-vibe-purple-700 transition-colors">
+          {title}
+        </h3>
+        <p className="text-vibe-gray-600 leading-relaxed">{description}</p>
+      </div>
+    </motion.div>
+  );
+}
+
 export function Features() {
   const router = useRouter();
 
   return (
     <section
       id="features"
-      className="py-20 bg-gradient-to-b from-white to-vibe-gray-50"
+      className="py-20 bg-gradient-to-b from-white to-vibe-gray-50 overflow-x-hidden"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
@@ -122,37 +160,9 @@ export function Features() {
           viewport={{ once: true }}
           className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
         >
-          {features.map((feature, index) => {
-            const Icon = feature.icon;
-            return (
-              <motion.div
-                key={index}
-                variants={itemVariants}
-                whileHover={{ scale: 1.05 }}
-                className="group bg-white rounded-2xl p-8 shadow-lg border border-vibe-gray-100 hover:shadow-xl hover:border-vibe-purple-200 transition-all duration-300 relative overflow-hidden"
-              >
-                {/* Hover background effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-vibe-gray-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                <div className="relative z-10">
-                  {/* Feature icon */}
-                  <div
-                    className={`w-14 h-14 rounded-xl bg-gradient-to-r ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
-                  >
-                    <Icon className="w-7 h-7 text-white" />
-                  </div>
-
-                  {/* Feature content */}
-                  <h3 className="text-xl font-bold text-vibe-gray-800 mb-3 group-hover:text-vibe-purple-700 transition-colors">
-                    {feature.title}
-                  </h3>
-                  <p className="text-vibe-gray-600 leading-relaxed">
-                    {feature.description}
-                  </p>
-                </div>
-              </motion.div>
-            );
-          })}
+          {features.map((feature, index) => (
+            <FeatureCard key={index} {...feature} />
+          ))}
         </motion.div>
 
         {/* CTA button */}

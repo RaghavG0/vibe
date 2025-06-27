@@ -1,0 +1,34 @@
+@import "tailwindcss";
+@import "./theme.css";
+
+/* === Components Layer: Cards, Glass, Gradients, etc. === */
+@layer components {
+  .hero-text-gradient {
+    @apply bg-gradient-to-r from-vibe-purple-600 via-vibe-blue-500 to-vibe-mint-500 bg-clip-text text-transparent;
+  }
+  .feature-card-hover {
+    @apply transition-all duration-300 hover:scale-105 hover:shadow-vibe-purple-100;
+  }
+  .glass-effect {
+    @apply backdrop-blur-md bg-white/10 border border-white/20;
+  }
+  .floating-elements::before {
+    content: "";
+    @apply absolute inset-0 hero-pattern;
+    animation: float 8s ease-in-out infinite;
+  }
+  .blog-card {
+    @apply bg-white rounded-2xl shadow-lg border border-vibe-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-vibe-purple-200;
+  }
+  .gradient-border {
+    @apply relative;
+  }
+  .gradient-border::before {
+    content: "";
+    @apply absolute inset-0 rounded-lg p-[2px] vibe-gradient;
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: subtract;
+  }
+}

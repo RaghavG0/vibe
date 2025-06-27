@@ -1,204 +1,51 @@
-/* Imports */
+/* === Imports === */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap");
 @import "tailwindcss";
-@import "../styles/theme.css"
+@import "../styles/theme.css";
+@import "../styles/base.css";
+@import "../styles/components.css";
+@import "../styles/overrides.css";
+@import "../styles/utilities.css";
 
-/* Global Selectors */
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover            { filter: drop-shadow(0 0 2em #646cffaa); }
-.logo.react:hover      { filter: drop-shadow(0 0 2em #61dafbaa); }
-
-.card                  { padding: 2em; }
-.read-the-docs         { color: #888; }
-
-@keyframes logo-spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-/* Custom utilities (Background Gradients) */
+/* === Custom Utilities: Gradients & Patterns === */
 @utility hero-pattern {
-   {
+  {
     background-image:
       radial-gradient(circle at 30% 20%, rgba(159,85,255,0.1) 0%, transparent 50%),
       radial-gradient(circle at 80% 80%, rgba(14,165,233,0.1) 0%, transparent 50%),
       radial-gradient(circle at 40% 40%, rgba(20,184,166,0.1) 0%, transparent 50%);
   }
 }
-
 @utility gradient-radial {
-    background-image: radial-gradient(var(--tw-gradient-stops));
+  background-image: radial-gradient(var(--tw-gradient-stops));
 }
-
-@utility gradient-conic  {
-    background-image: conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops));
+@utility gradient-conic {
+  background-image: conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops));
 }
-
 @utility vibe-gradient {
-    background-image: linear-gradient(135deg, var(--color-vibe-purple-500) 0%, var(--color-vibe-blue-500) 50%, var(--color-vibe-mint-500) 100%);
+  background-image: linear-gradient(135deg, var(--color-vibe-purple-500) 0%, var(--color-vibe-blue-500) 50%, var(--color-vibe-mint-500) 100%);
 }
-
 @utility vibe-gradient-light {
-    background-image: linear-gradient(135deg, #f8f4ff 0%, #f0f8ff 50%, #f0fdf9 100%);
+  background-image: linear-gradient(135deg, #f8f4ff 0%, #f0f8ff 50%, #f0fdf9 100%);
 }
 
-/* Base Layer styles */
-@layer base {
-  * {
-    @apply border-border;
-  }
-  html, body {
-    @apply bg-background text-foreground;
-    background-color: #111827;
-    font-feature-settings: "rlig" 1, "calt" 1;
-    font-family: "Poppins", "Inter", system-ui, sans-serif;
-  }
-}
-
-/* Components Layer styles */
-@layer components {
-  .hero-text-gradient {
-    @apply bg-gradient-to-r
-           from-vibe-purple-600
-           via-vibe-blue-500
-           to-vibe-mint-500
-           bg-clip-text text-transparent;
-  }
-
-  .feature-card-hover {
-    @apply transition-all duration-300
-           hover:scale-105
-           hover:shadow-vibe-purple-100;
-  }
-
-  .glass-effect {
-    @apply backdrop-blur-md bg-white/10 border border-white/20;
-  }
-
-  .floating-elements::before {
-    content: "";
-    @apply absolute inset-0 hero-pattern;
-    animation: float 8s ease-in-out infinite;
-  }
-
-  .blog-card {
-    @apply bg-white rounded-2xl shadow-lg
-           border border-vibe-gray-100
-           overflow-hidden transition-all duration-300
-           hover:shadow-xl
-           hover:scale-[1.02]
-           hover:border-vibe-purple-200;
-  }
-
-  .gradient-border {
-    @apply relative;
-  }
-  .gradient-border::before {
-    content: "";
-    @apply absolute inset-0 rounded-lg p-[2px] vibe-gradient;
-    mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    mask-composite: subtract;
-  }
-}
-
-/* Layer utilities styles */
-@layer utilities {
-  .text-balance { 
-    text-wrap: balance; 
-  }
-
-  /* Container utility */
-  .container {
-    margin-left: auto;
-    margin-right: auto;
-    padding-left:  2rem;
-    padding-right: 2rem;
-  }
-
-  /* Animation utilities */
-  .animate-accordion-down   { animation: accordion-down 0.2s ease-out; }
-  .animate-accordion-up     { animation: accordion-up   0.2s ease-out; }
-  .animate-float            { animation: float          6s ease-in-out infinite; }
-  .animate-slide-up         { animation: slide-up       0.5s ease-out; }
-  .animate-fade-in          { animation: fade-in        0.5s ease-out; }
-  .animate-bounce-slow      { animation: bounce         3s ease-in-out infinite; }
-  .animate-pulse-slow       { animation: pulse          4s ease-in-out infinite; }
-}
-
-/* Animations */
+/* === Animations Keyframes === */
 @keyframes accordion-down { from { height: 0; } to { height: var(--radix-accordion-content-height); } }
-@keyframes accordion-up   { from { height: var(--radix-accordion-content-height); } to { height: 0; } }
-@keyframes float          { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
-@keyframes slide-up       { 0% { opacity:0; transform:translateY(30px); } 100% { opacity:1; transform:translateY(0); } }
-@keyframes fade-in        { 0% { opacity:0; } 100% { opacity:1; } }
+@keyframes accordion-up { from { height: var(--radix-accordion-content-height); } to { height: 0; } }
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+@keyframes slide-up { 0% { opacity:0; transform:translateY(30px); } 100% { opacity:1; transform:translateY(0); } }
+@keyframes fade-in { 0% { opacity:0; } 100% { opacity:1; } }
 
-/* Animations Delay */
+/* === Animation Delays === */
 .delay-100 { animation-delay: 0.1s; }
 .delay-200 { animation-delay: 0.2s; }
 .delay-300 { animation-delay: 0.3s; }
 .delay-400 { animation-delay: 0.4s; }
 .delay-500 { animation-delay: 0.5s; }
 
-/* Scrollbar Scrolling */
-::-webkit-scrollbar       { width: 8px; height: 8px; }
+/* === Scrollbar Styling === */
+::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: var(--vibe-gray-100); }
 ::-webkit-scrollbar-thumb { background: var(--vibe-purple-300); border-radius: 9999px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--vibe-purple-400); }
 html { scroll-behavior: smooth; }
-
-/* Remove blue outline and box-shadow from react-datepicker input */
-.custom-datepicker-input:focus {
-  outline: none !important;
-  box-shadow: none !important;
-  background: transparent !important;
-}
-
-/* Position calendar above input and center horizontally */
-.datepicker-center-popper {
-  left: 50% !important;
-  transform: translateX(-50%) translateY(-100%) !important;
-  top: 0 !important;
-  bottom: auto !important;
-  margin-top: -12px !important; /* Optional fine-tuning */
-}
-
-/* Center the triangle and pull it up to connect cleanly */
-.datepicker-center-popper .react-datepicker__triangle {
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  top: 100% !important;
-  margin-top: -1px !important;
-}
-
-/* Make icon white for selected option in react-select dropdown */
-.react-select__option--is-selected .text-gray-400,
-.react-select__option--is-selected .text-vibe-purple-400 {
-  color: #fff !important;
-}
-
-/* Make icon white for selected option in language-select, color-theme-select, currency-select, etc. */
-.language-select__option--is-selected .text-gray-400,
-.color-theme-select__option--is-selected .text-gray-400,
-.currency-select__option--is-selected .text-gray-400,
-.date-format-select__option--is-selected .text-gray-400 {
-  color: #fff !important;
-}

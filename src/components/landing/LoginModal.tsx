@@ -25,12 +25,10 @@ export function LoginModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(""); // Reset error state
+    setError("");
     setIsLoading(true);
-    
-    // Simulate a short delay for the refresh effect
+
     setTimeout(() => {
-      // Custom validation
       if (!email.trim()) {
         setError("Email is required.");
         setIsLoading(false);
@@ -47,8 +45,6 @@ export function LoginModal({
         setIsLoading(false);
         return;
       }
-
-      // Dummy login logic
       setTimeout(() => {
         if (email === "demo@vibewealth.com" && password === "password123") {
           onClose();
@@ -58,7 +54,7 @@ export function LoginModal({
         }
         setIsLoading(false);
       }, 1000);
-    }, 300); // 300ms delay for the "refresh" effect
+    }, 300);
   };
 
   const handleGoogleLogin = () => {
@@ -152,7 +148,7 @@ export function LoginModal({
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="you@example.com"
-                        className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-vibe-purple-500 focus:outline-none"                    
+                        className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-vibe-purple-500 focus:outline-none"
                       />
                     </div>
                   </div>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { RefreshCw, Check, Mail } from "lucide-react";
 import toast from "react-hot-toast";
-import { Button } from "@/components/landing/button"; // Adjust path if needed
+import { Button } from "@/components/landing/button";
 
 export function ResendMailButton() {
   const [isLoading, setIsLoading] = useState(false);
@@ -12,7 +12,6 @@ export function ResendMailButton() {
 
   useEffect(() => {
     if (cooldown === 0) return;
-
     const timer = setInterval(() => {
       setCooldown((prev) => {
         if (prev <= 1) {
@@ -22,15 +21,12 @@ export function ResendMailButton() {
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(timer);
   }, [cooldown]);
 
   const handleClick = async () => {
     if (cooldown > 0 || isLoading) return;
-
     setIsLoading(true);
-
     try {
       // Simulate API call
       await new Promise((res) => setTimeout(res, 1000));
@@ -85,5 +81,5 @@ export function ResendMailButton() {
           : `Didn't get it? Resend the email now.`}
       </p>
     </div>
-  );
+  )
 }

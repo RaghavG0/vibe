@@ -2,25 +2,21 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
-  Eye,
-  EyeOff,
-  User,
-  Mail,
-  Lock,
-  Check,
-  X,
-  TrendingUp,
-  ArrowLeft,
+  Eye, EyeOff, User, Mail, Lock, ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/landing/button";
+import { PasswordStrengthMeter } from "@/components/ui/PasswordStrengthMeter";
+import { PasswordRequirementsList } from "@/components/ui/PasswordRequirementsList";
+import { SignupBrandingPanel } from "@/components/Signup/SignupBrandingPanel";
+import { usePasswordMeterVisibility } from "@/hooks/usePasswordMeterVisibility";
 
 export default function SignUp() {
   const router = useRouter();
 
-  // Form state
+  // --- Form state ---
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -31,17 +27,21 @@ export default function SignUp() {
     newsletter: false,
   });
 
-  // UI state
+  const {
+    passwordMeterVisible,
+    handleFocus: handlePasswordFocus,
+    handleChange: handlePasswordChange,
+    handleBlur: handlePasswordBlur,
+  } = usePasswordMeterVisibility(formData.password);
+
+  // --- UI state ---
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [showPasswordRecommendationPopup, setShowPasswordRecommendationPopup] = useState(false);
-  const [hasShownPasswordRecommendation, setHasShownPasswordRecommendation] = useState(false);
   const [isConfirmTyping, setIsConfirmTyping] = useState(false);
 
-
-  // Password requirements for strength meter
+  // --- Password requirements ---
   const passwordRequirements = [
     { regex: /.{8,}/, text: "Minimum 8 characters" },
     { regex: /[a-z]/, text: "One lowercase letter" },
@@ -50,7 +50,7 @@ export default function SignUp() {
     { regex: /[!@#$%^&*(),.?\":{}|<>]/, text: "One special character" },
   ];
 
-  // Calculate password strength
+  // --- Password strength ---
   const getPasswordStrength = (password: string) => {
     const passed = passwordRequirements.filter((req) => req.regex.test(password));
     return {
@@ -59,197 +59,63 @@ export default function SignUp() {
       percentage: (passed.length / passwordRequirements.length) * 100,
     };
   };
-
   const passwordStrength = getPasswordStrength(formData.password);
 
-  // Handle input changes for all fields
+  // --- Input change handler ---
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
-  // Validate all form fields
+  // --- Form validation ---
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-
-    // First name
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = "First name is required";
-    }
-    // Last name
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = "Last name is required";
-    }
-    // Email
+    if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
+    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (
-      !emailRegex.test(formData.email)
-    ) {
-      newErrors.email = "Please enter a valid email address (e.g., user@example.com)";
-    }
-    // Password
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
-    }
-
-    // Confirm password
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password";
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
-
-    // Only show toast if there are no password errors so far
-    // Terms agreement
-    if (!formData.agreeToTerms) {
-      newErrors.agreeToTerms =
-        "You must agree to the Terms of Service and Privacy Policy to create an account";
-    }
-    
-    if (
-      Object.keys(newErrors).length === 0 &&
-      passwordStrength.score < passwordRequirements.length &&
-      !showPasswordRecommendationPopup &&
-      !hasShownPasswordRecommendation
-    ) {
-      setShowPasswordRecommendationPopup(true);
-      setHasShownPasswordRecommendation(true);
-      return false;
-    }
-
+    if (!formData.email.trim()) newErrors.email = "Email is required";
+    else if (!emailRegex.test(formData.email)) newErrors.email = "Please enter a valid email address (e.g., user@example.com)";
+    if (!formData.password) newErrors.password = "Password is required";
+    else if (formData.password.length < 8) newErrors.password = "Password must be at least 8 characters";
+    // All password requirements must be met
+    passwordRequirements.forEach(req => {
+      if (!req.regex.test(formData.password)) {
+        newErrors.password = "Password does not meet all requirements";
+      }
+    });
+    if (!formData.confirmPassword) newErrors.confirmPassword = "Please confirm your password";
+    else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match";
+    if (!formData.agreeToTerms) newErrors.agreeToTerms = "You must agree to the Terms of Service and Privacy Policy to create an account";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submission
+  // --- Form submit handler ---
   const handleSubmit = async (e: React.FormEvent) => {
-    setShowPasswordRecommendationPopup(false);
     e.preventDefault();
-    setErrors({});        // Clear all errors
-    setIsLoading(true);   // Show loading spinner
+    setErrors({});
+    setIsLoading(true);
 
     setTimeout(() => {
-      const isValid = validateForm(); // This sets errors if invalid
+      const isValid = validateForm();
       setIsLoading(false);
-      // If valid, proceed
       if (isValid) {
         router.push("/onboarding?signup=success");
       }
-      // If not valid, errors will be shown (set by validateForm)
-    }, 400); // 400ms for the "refresh" effect
+    }, 400);
   };
 
-  // Helpers for password strength UI
-  const getStrengthColor = () => {
-    if (passwordStrength.percentage < 40) return "bg-red-500";
-    if (passwordStrength.percentage < 80) return "bg-yellow-500";
-    return "bg-green-500";
-  };
-
-  const getStrengthText = () => {
-    if (passwordStrength.percentage < 40) return "Weak";
-    if (passwordStrength.percentage < 80) return "Medium";
-    return "Strong";
-  };
-
-  const WeakPasswordToast = () =>
-    showPasswordRecommendationPopup ? (
-      <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50 w-[90vw] max-w-xs sm:max-w-md">
-        <div className="flex flex-col items-center sm:flex-row sm:items-center bg-vibe-gray-800 border border-vibe-purple-500 text-white px-4 py-3 sm:px-6 sm:py-3 rounded-xl shadow-lg space-y-3 sm:space-y-0 sm:space-x-3">
-          <span className="text-2xl sm:text-xl">⚠️</span>
-          <span className="flex-1 text-sm sm:text-base text-center sm:text-left leading-snug">
-            Your password could be stronger. If you still want to use this password, press ‘Create Account’ again.
-          </span>
-          <button
-            onClick={() => setShowPasswordRecommendationPopup(false)}
-            className="text-gray-400 hover:text-white focus:outline-none cursor-pointer self-center sm:self-auto"
-            aria-label="Close"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-    ) : null;
-
+  // --- Render ---
   return (
     <div className="min-h-screen w-screen overflow-hidden bg-gray-900 flex">
-      <WeakPasswordToast />
       {/* Left Side - Branding */}
-      <motion.div
-        initial={{ opacity: 0, x: -50 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6 }}
-        className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-vibe-purple-900 via-vibe-blue-900 to-vibe-mint-900 relative overflow-hidden"
-      >
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-20">
-          <div
-            className="w-full h-full"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1' opacity='0.3'%3E%3Cpath d='M10,30 Q20,10 30,20 T50,15'/%3E%3Cpath d='M5,40 Q15,20 25,30 T45,25'/%3E%3C/g%3E%3C/svg%3E")`,
-              backgroundSize: "60px 60px",
-            }}
-          />
-        </div>
-        {/* Branding Content */}
-        <div className="relative z-10 flex flex-col justify-center items-center text-center px-12 py-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            {/* Logo */}
-            <div className="flex items-center space-x-3 mb-8">
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                <TrendingUp className="w-7 h-7 text-white" />
-              </div>
-              <span className="text-2xl font-bold text-white">VibeWealth</span>
-            </div>
-            {/* Heading */}
-            <h1 className="text-4xl font-bold text-white mb-6">
-              Start your financial journey with us
-            </h1>
-            <p className="text-xl text-white/80 mb-8 leading-relaxed">
-              Join thousands of Gen Z users who&apos;ve already transformed their
-              relationship with money.
-            </p>
-            {/* Features List */}
-            <div className="space-y-4">
-              {[
-                "AI-powered financial insights",
-                "Beautiful budget visualization",
-                "Dream goal tracking",
-                "24/7 support community",
-              ].map((feature, index) => (
-                <motion.div
-                  key={feature}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
-                  className="flex items-center space-x-3"
-                >
-                  <div className="w-6 h-6 bg-vibe-mint-400 rounded-full flex items-center justify-center">
-                    <Check className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-white/90">{feature}</span>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      </motion.div>
+      <SignupBrandingPanel />
 
       {/* Right Side - Sign Up Form */}
       <div className="w-full lg:w-1/2 flex flex-col h-screen overflow-hidden">
@@ -265,7 +131,7 @@ export default function SignUp() {
               <ArrowLeft className="w-5 h-5" />
               <span>Back to home</span>
             </Link>
-            {/* Right: Account group, row on desktop, stacked on mobile */}
+            {/* Right: Account group */}
             <div className="flex flex-col items-end justify-center sm:flex-row sm:items-center sm:space-x-2 sm:space-y-0 space-y-1">
               <span className="text-gray-400 text-sm">Already have an account?</span>
               <button
@@ -386,7 +252,12 @@ export default function SignUp() {
                     type={showPassword ? "text" : "password"}
                     name="password"
                     value={formData.password}
-                    onChange={handleInputChange}
+                    onFocus={handlePasswordFocus}
+                    onChange={e => {
+                      handleInputChange(e);
+                      handlePasswordChange();
+                    }}
+                    onBlur={handlePasswordBlur}
                     placeholder="Create a strong password"
                     className={`w-full pl-10 pr-12 py-3 bg-gray-800 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
                       errors.password
@@ -407,53 +278,11 @@ export default function SignUp() {
                   </button>
                 </div>
                 {/* Password Strength Meter */}
-                {formData.password && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-400">
-                        Password strength
-                      </span>
-                      <span
-                        className={`text-xs font-medium ${
-                          passwordStrength.percentage < 40
-                            ? "text-red-400"
-                            : passwordStrength.percentage < 80
-                            ? "text-yellow-400"
-                            : "text-green-400"
-                        }`}
-                      >
-                        {getStrengthText()}
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-700 rounded-full h-1">
-                      <div
-                        className={`h-1 rounded-full transition-all duration-300 ${getStrengthColor()}`}
-                        style={{ width: `${passwordStrength.percentage}%` }}
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 gap-1">
-                      {passwordRequirements.map((req, index) => {
-                        const isMet = req.regex.test(formData.password);
-                        return (
-                          <div
-                            key={index}
-                            className="flex items-center space-x-2"
-                          >
-                            {isMet ? (
-                              <Check className="w-3 h-3 text-green-400" />
-                            ) : (
-                              <X className="w-3 h-3 text-gray-400" />
-                            )}
-                            <span
-                              className={`text-xs ${isMet ? "text-green-400" : "text-gray-400"}`}
-                            >
-                              {req.text}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+                {passwordMeterVisible && (
+                  <>
+                    <PasswordStrengthMeter password={formData.password} requirements={passwordRequirements} />
+                    <PasswordRequirementsList password={formData.password} requirements={passwordRequirements} />
+                  </>
                 )}
                 {errors.password && (
                   <p className="text-sm text-red-400">{errors.password}</p>
@@ -505,16 +334,14 @@ export default function SignUp() {
                   <div className="flex items-center space-x-2">
                     {formData.password === formData.confirmPassword ? (
                       <>
-                        <Check className="w-4 h-4 text-green-400" />
-                        <span className="text-sm text-green-400">
-                          Passwords match
+                        <span className="text-sm text-green-400 flex items-center">
+                          ✓ Passwords match
                         </span>
                       </>
                     ) : (
                       <>
-                        <X className="w-4 h-4 text-red-400" />
-                        <span className="text-sm text-red-400">
-                          Passwords don&apos;t match
+                        <span className="text-sm text-red-400 flex items-center">
+                          ✗ Passwords don't match
                         </span>
                       </>
                     )}

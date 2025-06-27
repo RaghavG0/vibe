@@ -18,6 +18,7 @@ export function BlogCarousel() {
   const {
     currentIndex,
     setCurrentIndex,
+    isAutoPlaying,
     setIsAutoPlaying,
     nextSlide,
     prevSlide,
@@ -104,13 +105,13 @@ export function BlogCarousel() {
           {/* Dots Indicator */}
           <div className="flex justify-center space-x-2 mt-8">
             {Array.from({
-              length: blogPosts.length,
+              length: Math.ceil(blogPosts.length / itemsPerView),
             }).map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentIndex(index)}
                 className={`w-2 h-2 rounded-full transition-colors duration-200 ${
-                  Math.floor(currentIndex) === index
+                  Math.floor(currentIndex / itemsPerView) === index
                     ? "bg-vibe-purple-600"
                     : "bg-vibe-gray-300"
                 }`}

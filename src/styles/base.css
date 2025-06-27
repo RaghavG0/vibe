@@ -1,0 +1,18 @@
+@import "tailwindcss";
+@import "./theme.css";
+
+/* === Base Layer: HTML, Body, Fonts, Resets === */
+@layer base {
+  html, body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: "Poppins", system-ui, sans-serif;
+  }
+  /* Only apply this background on onboarding page */
+  body.onboarding-page {
+    background-color: #111827 !important;
+  }
+  * {
+    @apply border-border;
+  }
+}

@@ -9,25 +9,32 @@ interface AnimatedCounterProps {
   duration?: number; // in seconds
 }
 
+function getNumericValue(val: string) {
+  const numStr = val.replace(/[^\d.]/g, "");
+  const num = parseFloat(numStr);
+
+  if (val.includes("K")) return num * 1000;
+  if (val.includes("M")) return num * 1000000;
+  if (val.includes("%")) return num;
+  return num;
+}
+
+function formatValue(num: number, value: string) {
+  if (value.includes("K")) return `${(num / 1000).toFixed(0)}K`;
+  if (value.includes("M")) return `${(num / 1000000).toFixed(1)}M`;
+  if (value.includes("%")) return `${num}%`;
+  if (value.includes("/")) return value;
+  return num.toString();
+}
+
 export function AnimatedCounter({
   value,
   suffix = "",
   duration = 2,
 }: AnimatedCounterProps) {
   const [count, setCount] = useState(0);
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
-
-  // Converts things like "50K+" to 50000
-  const getNumericValue = (val: string) => {
-    const numStr = val.replace(/[^\d.]/g, "");
-    const num = parseFloat(numStr);
-
-    if (val.includes("K")) return num * 1000;
-    if (val.includes("M")) return num * 1000000;
-    if (val.includes("%")) return num;
-    return num;
-  };
 
   const targetValue = getNumericValue(value);
 
@@ -37,7 +44,6 @@ export function AnimatedCounter({
     let startTime: number;
     let animationId: number;
 
-    // Simple custom animation frame logic with easeOut
     const animate = (currentTime: number) => {
       if (!startTime) startTime = currentTime;
       const elapsed = currentTime - startTime;
@@ -60,24 +66,16 @@ export function AnimatedCounter({
     };
   }, [isInView, targetValue, duration]);
 
-  // Formats number back to K/M/%/etc. for display
-  const formatValue = (num: number) => {
-    if (value.includes("K")) return `${(num / 1000).toFixed(0)}K`;
-    if (value.includes("M")) return `${(num / 1000000).toFixed(1)}M`;
-    if (value.includes("%")) return `${num}%`;
-    if (value.includes("/")) return value;
-    return num.toString();
-  };
-
   return (
     <motion.div
       ref={ref}
-      className="text-3xl font-bold text-vibe-purple-700"
+      className="text-3xl font-bold text-vibe-purple-700 whitespace-nowrap"
       initial={{ opacity: 0, scale: 0.5 }}
       animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.5 }}
       transition={{ duration: 0.5, delay: 0.2 }}
+      style={{ maxWidth: "100%" }} // Prevents accidental overflow
     >
-      {formatValue(count)}
+      {formatValue(count, value)}
       {suffix}
     </motion.div>
   )

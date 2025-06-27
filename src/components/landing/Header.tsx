@@ -6,25 +6,26 @@ import { motion } from "framer-motion";
 import { Menu, X, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
-
 import { Button } from "./button";
 import { LoginModal } from "@/components/landing/LoginModal";
+
+// --- Navigation items as a constant for reusability ---
+const navItems = [
+  { name: "Features", href: "#features" },
+  { name: "Why Us", href: "#why-us" },
+  { name: "Blog", href: "#blog" },
+];
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const router = useRouter();
 
+  // For portal rendering (avoids hydration mismatch)
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const navItems = [
-    { name: "Features", href: "#features" },
-    { name: "Why Us", href: "#why-us" },
-    { name: "Blog", href: "#blog" },
-  ];
 
   // Height of header in px (h-16 = 64px)
   const headerHeight = 64;
@@ -118,7 +119,7 @@ export default function Header() {
               exit={{ opacity: 0, y: -16 }}
               transition={{ duration: 0.25 }}
               className="md:hidden border-t border-vibe-gray-200 bg-white z-50 fixed top-16 left-0 right-0 rounded-b-xl shadow-xl"
-              style={{ maxWidth: "100vw" }}
+              style={{ maxWidth: "100vw" }} // Prevents x-overflow
             >
               <div className="px-2 pt-2 pb-3 space-y-1">
                 {navItems.map((item) => (

@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import ForgotPasswordContent from "./ForgotPasswordContent";
+import ForgotPasswordContent from "./ForgotPasswordContent1";
 
 export default function ForgotPasswordPage() {
   return (

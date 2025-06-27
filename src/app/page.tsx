@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-// Landing page components
+// Landing page sections
 import Header from "@/components/landing/Header";
 import { Hero } from "@/components/landing/Hero";
 import { Features } from "@/components/landing/features";
@@ -14,21 +14,22 @@ import { Footer } from "@/components/landing/Footer";
 import { LoginModal } from "@/components/landing/LoginModal";
 
 export default function Home() {
-  // State to control visibility of login modal
+  // --- Modal state and handlers ---
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    // Check localStorage to auto-open login modal if flag is set
+    // Auto-open login modal if flag is set in localStorage (e.g., after redirect)
     const shouldShow = localStorage.getItem("openLogin");
     if (shouldShow === "true") {
       setIsLoginModalOpen(true);
-      localStorage.removeItem("openLogin"); // Clean up the flag
+      localStorage.removeItem("openLogin");
     }
   }, []);
 
+  // --- Render ---
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white w-screen">
       {/* Fixed header */}
       <Header />
 
@@ -41,7 +42,8 @@ export default function Home() {
         <FinalCTA />
         <Footer />
       </main>
-      {/* Login modal */}
+
+      {/* Login modal (shown on demand) */}
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}

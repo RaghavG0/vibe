@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { motion } from "framer-motion";
 import {
@@ -43,6 +43,61 @@ const differentiators = [
   },
 ];
 
+// --- StatCard extracted for clarity ---
+function StatCard({ stat, index }: { stat: typeof stats[0]; index: number }) {
+  const Icon = stat.icon;
+  return (
+    <motion.div
+      initial={{ scale: 0.8, opacity: 0 }}
+      whileInView={{ scale: 1, opacity: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      className="text-center group"
+    >
+      {/* Icon box */}
+      <div
+        className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-r from-${stat.color}-500 to-${stat.color}-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+      >
+        <Icon className="w-8 h-8 text-white" />
+      </div>
+      {/* Animated number */}
+      <div className="mb-2">
+        <AnimatedCounter value={stat.number} />
+      </div>
+      <div className="text-vibe-gray-600 font-medium">{stat.label}</div>
+    </motion.div>
+  );
+}
+
+// --- DifferentiatorCard extracted for clarity ---
+function DifferentiatorCard({
+  item,
+  index,
+}: {
+  item: typeof differentiators[0];
+  index: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
+      className="flex items-start space-x-4 p-6 rounded-2xl hover:bg-vibe-gray-50 transition-colors duration-300"
+    >
+      <div className="flex-shrink-0">
+        <CheckCircle className="w-6 h-6 text-vibe-mint-500" />
+      </div>
+      <div>
+        <h4 className="text-lg font-semibold text-vibe-gray-800 mb-2">
+          {item.title}
+        </h4>
+        <p className="text-vibe-gray-600">{item.description}</p>
+      </div>
+    </motion.div>
+  );
+}
+
 export function WhyUs() {
   return (
     <section id="why-us" className="py-20 bg-white">
@@ -59,11 +114,9 @@ export function WhyUs() {
             <Shield className="w-4 h-4 mr-2" />
             Why Choose VibeWealth?
           </div>
-
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
             The <span className="text-vibe-purple-700">smarter choice</span> for your money
           </h2>
-
           <p className="text-xl text-vibe-gray-600 max-w-3xl mx-auto">
             We&apos;re not just another finance app. We&apos;re a movement that&apos;s changing how Gen Z thinks about money.
           </p>
@@ -77,36 +130,9 @@ export function WhyUs() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-20"
         >
-          {stats.map((stat, index) => {
-            const Icon = stat.icon;
-
-            return (
-              <motion.div
-                key={index}
-                initial={{ scale: 0.8, opacity: 0 }}
-                whileInView={{ scale: 1, opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="text-center group"
-              >
-                {/* Icon box */}
-                <div
-                  className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-r from-${stat.color}-500 to-${stat.color}-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
-                >
-                  <Icon className="w-8 h-8 text-white" />
-                </div>
-
-                {/* Animated number */}
-                <div className="mb-2">
-                  <AnimatedCounter value={stat.number} />
-                </div>
-
-                <div className="text-vibe-gray-600 font-medium">
-                  {stat.label}
-                </div>
-              </motion.div>
-            );
-          })}
+          {stats.map((stat, index) => (
+            <StatCard key={stat.label} stat={stat} index={index} />
+          ))}
         </motion.div>
 
         {/* Differentiators */}
@@ -120,27 +146,9 @@ export function WhyUs() {
           <h3 className="text-2xl sm:text-3xl font-bold text-center mb-12">
             What makes us <span className="text-vibe-purple-700">different</span>
           </h3>
-
           <div className="grid md:grid-cols-2 gap-8">
             {differentiators.map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="flex items-start space-x-4 p-6 rounded-2xl hover:bg-vibe-gray-50 transition-colors duration-300"
-              >
-                <div className="flex-shrink-0">
-                  <CheckCircle className="w-6 h-6 text-vibe-mint-500" />
-                </div>
-                <div>
-                  <h4 className="text-lg font-semibold text-vibe-gray-800 mb-2">
-                    {item.title}
-                  </h4>
-                  <p className="text-vibe-gray-600">{item.description}</p>
-                </div>
-              </motion.div>
+              <DifferentiatorCard key={item.title} item={item} index={index} />
             ))}
           </div>
         </motion.div>
