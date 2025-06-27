@@ -58,7 +58,6 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
   setDobFocused,
   setDobOpen,
   countryOptions,
-  countrySelectRef,
   countryFocused,
   setCountryFocused,
   datePickerRef,
@@ -269,7 +268,7 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
                 dropdownMode="select"
                 autoComplete="off"
                 isClearable
-                onFocus={e => {
+                onFocus={() => {
                   setDobFocused(true);
                   setCountryFocused(false);
                   // Open calendar on focus (tab)
