@@ -50,17 +50,6 @@ export default function SignUp() {
     { regex: /[!@#$%^&*(),.?\":{}|<>]/, text: "One special character" },
   ];
 
-  // --- Password strength ---
-  const getPasswordStrength = (password: string) => {
-    const passed = passwordRequirements.filter((req) => req.regex.test(password));
-    return {
-      score: passed.length,
-      total: passwordRequirements.length,
-      percentage: (passed.length / passwordRequirements.length) * 100,
-    };
-  };
-  const passwordStrength = getPasswordStrength(formData.password);
-
   // --- Input change handler ---
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -341,7 +330,7 @@ export default function SignUp() {
                     ) : (
                       <>
                         <span className="text-sm text-red-400 flex items-center">
-                          ✗ Passwords don't match
+                          ✗ Passwords don&apos;t match
                         </span>
                       </>
                     )}

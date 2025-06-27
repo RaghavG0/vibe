@@ -1,5 +1,3 @@
-import { Check, X } from "lucide-react";
-
 export function PasswordStrengthMeter({ password, requirements }: {
   password: string;
   requirements: { regex: RegExp; text: string }[];

@@ -1,7 +1,7 @@
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { TrendingUp } from "lucide-react";
 
-export function CardPreview({ variants }: { variants?: any }) {
+export function CardPreview({ variants }: { variants?: Variants }) {
   return (
     <motion.div variants={variants} className="relative flex items-center justify-center">
       <div className="relative w-full max-w-lg">

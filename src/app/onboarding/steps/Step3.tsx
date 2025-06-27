@@ -4,7 +4,6 @@ import { Button } from "@/components/landing/button";
 import {
   PiggyBank, TrendingUp, Target, GraduationCap, Home, Plane, Heart, Building
 } from "lucide-react";
-import { goalOptions } from "../utils";
 
 // Map icon string to component
 const iconMap = {

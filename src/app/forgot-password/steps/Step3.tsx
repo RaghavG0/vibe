@@ -37,10 +37,8 @@ const Step3: React.FC<Step3Props> = ({
   errors,
   isLoading,
   passwordRequirements,
-  passwordStrength,
   passwordMeterVisible,
   handlePasswordFocus,
-  handlePasswordChange,
   handlePasswordBlur,
   onSubmit,
   onChange,
@@ -126,7 +124,7 @@ const Step3: React.FC<Step3Props> = ({
             </span>
           ) : (
             <span className="text-sm text-red-400 flex items-center">
-              ✗ Passwords don't match
+              ✗ Passwords don&apos;t match
             </span>
           )}
         </div>

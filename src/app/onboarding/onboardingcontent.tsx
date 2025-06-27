@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, TrendingUp, LogOut } from "lucide-react";
 import StepIndicator from "./steps/StepIndicator";
@@ -13,7 +13,6 @@ import SuccessPopup from "./SuccessPopup";
 import { useStepNavigation } from "@/hooks/useStepNavigation";
 import { useSuccessPopup } from "@/hooks/useSuccessPopup";
 import { useFocusHandlers } from "@/hooks/useFocusHandlers";
-import { Button } from "@/components/landing/button";
 import {
   steps,
   countryOptions,
@@ -23,14 +22,17 @@ import {
   getCurrencySymbol,
   formatDate,
 } from "./utils";
+import type { SelectInstance, GroupBase } from "react-select";
+
+type CountryOptionType = { value: string; label: string };
+type OptionType = { value: string; label: React.ReactNode };
 
 export default function OnboardingContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const pathname = usePathname();
 
   // --- Success popup state (custom hook) ---
-  const [showSuccessPopup, setShowSuccessPopup] = useSuccessPopup("signup");
+  const [showSuccessPopup] = useSuccessPopup("signup");
 
   // --- Form state ---
   const [formData, setFormData] = useState({
@@ -56,11 +58,11 @@ export default function OnboardingContent() {
   // --- Refs for file and select controls ---
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dobWrapperRef = useRef<HTMLDivElement>(null);
-  const countrySelectRef = useRef(null);
-  const colorThemeSelectRef = useRef(null);
-  const languageSelectRef = useRef(null);
-  const currencySelectRef = useRef(null);
-  const dateFormatSelectRef = useRef(null);
+  const countrySelectRef = useRef<SelectInstance<CountryOptionType, false> | null>(null);
+  const colorThemeSelectRef = useRef<SelectInstance<OptionType, false, GroupBase<OptionType>> | null>(null);
+  const languageSelectRef = useRef<SelectInstance<OptionType, false, GroupBase<OptionType>> | null>(null);
+  const currencySelectRef = useRef<SelectInstance<OptionType, false, GroupBase<OptionType>> | null>(null);
+  const dateFormatSelectRef = useRef<SelectInstance<OptionType, false, GroupBase<OptionType>> | null>(null);
 
   // --- Focus handlers for selects and datepicker (custom hook) ---
   const dobFocus = useFocusHandlers();
@@ -94,8 +96,6 @@ export default function OnboardingContent() {
   // --- Step navigation logic (custom hook) ---
   const {
     currentStep,
-    setCurrentStep,
-    completedSteps,
     maxStepReached,
     goToStep,
     goNext,

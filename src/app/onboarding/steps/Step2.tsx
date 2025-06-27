@@ -2,16 +2,21 @@ import React from "react";
 import { Sparkles, Globe, Calendar, ArrowLeft, ArrowRight } from "lucide-react";
 import Select from "../SelectClient";
 import { Button } from "@/components/landing/button";
+import type { FormData, CurrencyOption } from "../type";
+import type { RefObject } from "react";
+import type { SelectInstance, GroupBase } from "react-select";
+
+type OptionType = { value: string; label: React.ReactNode };
 
 interface Step2PreferencesProps {
-  formData: any;
+  formData: FormData;
   handleInputChange: (field: string, value: string) => void;
   goPrevious: () => void;
   goNext: () => void;
-  colorThemeSelectRef: any;
-  languageSelectRef: any;
-  currencySelectRef: any;
-  dateFormatSelectRef: any;
+  colorThemeSelectRef: RefObject<SelectInstance<OptionType, false, GroupBase<OptionType>> | null>;
+  languageSelectRef: RefObject<SelectInstance<OptionType, false, GroupBase<OptionType>> | null>;
+  currencySelectRef: RefObject<SelectInstance<OptionType, false, GroupBase<OptionType>> | null>;
+  dateFormatSelectRef: RefObject<SelectInstance<OptionType, false, GroupBase<OptionType>> | null>;
   colorThemeFocused: boolean;
   setColorThemeFocused: (v: boolean) => void;
   languageFocused: boolean;
@@ -20,7 +25,7 @@ interface Step2PreferencesProps {
   setCurrencyFocused: (v: boolean) => void;
   dateFormatFocused: boolean;
   setDateFormatFocused: (v: boolean) => void;
-  currencyOptions: any[];
+  currencyOptions: CurrencyOption[];
   languageMap: Record<string, string>;
   getCurrencySymbol: (code: string) => string;
   formatDate: (date: Date, format: string, lang: string) => string;
@@ -35,13 +40,9 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
   languageSelectRef,
   currencySelectRef,
   dateFormatSelectRef,
-  colorThemeFocused,
   setColorThemeFocused,
-  languageFocused,
   setLanguageFocused,
-  currencyFocused,
   setCurrencyFocused,
-  dateFormatFocused,
   setDateFormatFocused,
   currencyOptions,
   languageMap,

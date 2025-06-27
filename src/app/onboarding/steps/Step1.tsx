@@ -5,9 +5,14 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Select from "../SelectClient";
 import { Button } from "@/components/landing/button";
+import type { FormData} from "../type";
+import type { SelectInstance } from "react-select";
+
+
+type CountryOptionType = { value: string; label: string };
 
 interface Step1PersonalInfoProps {
-  formData: any;
+  formData: FormData;
   errors: Record<string, string>;
   setErrors: (errors: Record<string, string>) => void;
   profilePhoto: string | null;
@@ -24,7 +29,7 @@ interface Step1PersonalInfoProps {
   setDobFocused: (v: boolean) => void;
   setDobOpen: (v: boolean) => void;
   countryOptions: { name: string; flag: string }[];
-  countrySelectRef: any;
+  countrySelectRef: RefObject<SelectInstance<CountryOptionType, false> | null>;
   countryFocused: boolean;
   setCountryFocused: (v: boolean) => void;
 }
