@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import OnboardingContent from "./OnboardingContent";
+import OnboardingContent from "@/app/onboarding/Onboarding-Content";
 
 // Simple spinner component for fallback
 function Spinner() {
