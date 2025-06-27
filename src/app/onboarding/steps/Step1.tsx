@@ -8,6 +8,7 @@ import { Button } from "@/components/landing/button";
 import type { FormData } from "../type";
 import type { SelectInstance } from "react-select";
 import ReactDatePicker from "react-datepicker";
+import { isMobile } from "react-device-detect";
 
 type CountryOptionType = { value: string; label: string };
 
@@ -307,31 +308,38 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
             <Select
               ref={countrySelectRef}
               className="country-select w-full h-12 pl-10 pr-10 bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
-              options={countryOptions.map(c => ({
+              options={countryOptions.map((c) => ({
                 value: c.name,
                 label: `${c.flag} ${c.name}`,
               }))}
               value={
                 formData.country
-                  ? { value: formData.country, label: `${countryOptions.find(c => c.name === formData.country)?.flag || ""} ${formData.country}` }
+                  ? {
+                      value: formData.country,
+                      label: `${
+                        countryOptions.find((c) => c.name === formData.country)?.flag || ""
+                      } ${formData.country}`,
+                    }
                   : null
               }
-              onChange={opt => {
+              onChange={(opt) => {
                 handleInputChange("country", opt?.value || "");
-                // Blur input to close menu on mobile
-                const input = document.querySelector<HTMLInputElement>('.country-select input');
-                input?.blur();
-                // Also blur the select instance if possible
-                if (countrySelectRef.current && typeof countrySelectRef.current.blur === "function") {
-                  countrySelectRef.current.blur();
+                setCountryFocused(false);
+                if (!isMobile) {
+                  countrySelectRef.current?.blur?.();
+                  countrySelectRef.current?.onMenuClose?.();
+                  const input = document.querySelector<HTMLInputElement>('.country-select input');
+                  input?.blur();
+                  document.activeElement instanceof HTMLElement && document.activeElement.blur();
                 }
               }}
               placeholder="Select Country"
               menuPlacement="top"
+              menuPortalTarget={typeof window !== "undefined" ? document.body : null}
+              menuPosition="fixed"
               onFocus={() => {
                 setCountryFocused(true);
                 setDobFocused(false);
-                countrySelectRef.current?.onMenuOpen?.();
               }}
               onBlur={() => setCountryFocused(false)}
               styles={{
@@ -362,19 +370,10 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
                   ...base,
                   color: "#fff",
                 }),
-                indicatorsContainer: (base) => ({
-                  ...base,
-                  display: "none",
-                }),
-                dropdownIndicator: (base) => ({
-                  ...base,
-                  display: "none",
-                }),
-                indicatorSeparator: (base) => ({
-                  ...base,
-                  display: "none",
-                }),
-                menu: base => ({
+                indicatorsContainer: () => ({ display: "none" }),
+                dropdownIndicator: () => ({ display: "none" }),
+                indicatorSeparator: () => ({ display: "none" }),
+                menu: (base) => ({
                   ...base,
                   background: "#1f2937",
                   color: "#fff",
@@ -384,10 +383,9 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
                   zIndex: 1000,
                   maxHeight: 250,
                   overflowY: "auto",
-                  touchAction: "pan-y", // <- pan-y is best for vertical scroll
+                  touchAction: "auto",
                   WebkitOverflowScrolling: "touch",
-                  overscrollBehavior: "contain",
-                  position: "absolute",
+                  position: "fixed",
                 }),
                 option: (base, state) => ({
                   ...base,
