@@ -330,7 +330,9 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
                   countrySelectRef.current?.onMenuClose?.();
                   const input = document.querySelector<HTMLInputElement>('.country-select input');
                   input?.blur();
-                  document.activeElement instanceof HTMLElement && document.activeElement.blur();
+                  if (document.activeElement instanceof HTMLElement) {
+                    document.activeElement.blur();
+                  }
                 }
               }}
               placeholder="Select Country"
