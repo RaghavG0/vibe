@@ -238,7 +238,7 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
               }}
               dateFormat="dd-MM-yyyy"
               placeholderText="dd-mm-yyyy"
-              className="w-full pl-10 pr-10 py-3 bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
+              className="w-full pl-10 pr-16 py-3 bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
               maxDate={new Date()}
               showMonthDropdown
               showYearDropdown
@@ -316,7 +316,11 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
                   ? { value: formData.country, label: `${countryOptions.find(c => c.name === formData.country)?.flag || ""} ${formData.country}` }
                   : null
               }
-              onChange={opt => handleInputChange("country", opt?.value || "")}
+              onChange={opt => {
+                handleInputChange("country", opt?.value || "");
+                // Blur to close menu on mobile
+                document.querySelector<HTMLInputElement>('.country-select input')?.blur();
+              }}
               placeholder="Select Country"
               menuPlacement="top"
               onFocus={() => {
@@ -373,9 +377,11 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
                   marginLeft: 0,
                   width: "100%",
                   zIndex: 1000,
-                  maxHeiht: 250,
+                  maxHeight: 250,
                   overflowY: "auto",
-                  touchAction: "auto",
+                  touchAction: "pan-y",
+                  WebkitOverflowScrolling: "touch",
+                  position: "absolute",
                 }),
                 option: (base, state) => ({
                   ...base,
