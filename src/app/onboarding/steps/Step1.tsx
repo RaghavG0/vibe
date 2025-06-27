@@ -318,7 +318,13 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
               }
               onChange={opt => {
                 handleInputChange("country", opt?.value || "");
-                document.querySelector<HTMLInputElement>('.country-select input')?.blur();
+                // Blur input to close menu on mobile
+                const input = document.querySelector<HTMLInputElement>('.country-select input');
+                input?.blur();
+                // Also blur the select instance if possible
+                if (countrySelectRef.current && typeof countrySelectRef.current.blur === "function") {
+                  countrySelectRef.current.blur();
+                }
               }}
               placeholder="Select Country"
               menuPlacement="top"
@@ -378,8 +384,9 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
                   zIndex: 1000,
                   maxHeight: 250,
                   overflowY: "auto",
-                  touchAction: "auto",
+                  touchAction: "pan-y", // <- pan-y is best for vertical scroll
                   WebkitOverflowScrolling: "touch",
+                  overscrollBehavior: "contain",
                   position: "absolute",
                 }),
                 option: (base, state) => ({
