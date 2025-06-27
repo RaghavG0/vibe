@@ -223,7 +223,6 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
               onClick={() => {
                 // Open the calendar programmatically
                 if (datePickerRef.current) {
-                  // @ts-ignore: access private method for opening
                   datePickerRef.current.setOpen(true);
                 }
               }}
