@@ -5,9 +5,9 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Select from "../SelectClient";
 import { Button } from "@/components/landing/button";
-import type { FormData} from "../type";
+import type { FormData } from "../type";
 import type { SelectInstance } from "react-select";
-
+import ReactDatePicker from "react-datepicker";
 
 type CountryOptionType = { value: string; label: string };
 
@@ -32,6 +32,7 @@ interface Step1PersonalInfoProps {
   countrySelectRef: RefObject<SelectInstance<CountryOptionType, false> | null>;
   countryFocused: boolean;
   setCountryFocused: (v: boolean) => void;
+  datePickerRef: RefObject<ReactDatePicker | null>;
 }
 
 const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
@@ -55,6 +56,7 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
   countrySelectRef,
   countryFocused,
   setCountryFocused,
+  datePickerRef, // <-- Add this line
 }) => (
   <div className="p-4 sm:p-8">
     <div className="text-center mb-10">
@@ -205,13 +207,31 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
               ${errors.dob
                 ? "border-red-500 ring-red-500"
                 : (dobFocused || dobOpen)
-                  ? "border-vibe-purple-500 ring-vibe-purple-500"
-                  : "border-gray-700 focus:ring-vibe-purple-500 focus:border-transparent"
+                  ? "border-vibe-purple-500 ring-vibe-purple-500 ring-2"
+                  : "border-gray-700 focus:ring-2 focus:ring-vibe-purple-500 focus:border-transparent"
               }
             `}
           >
             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10" />
+            <div className="absolute right-10 top-2 bottom-2 w-px bg-gray-700 z-10" />
+            <svg
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10 cursor-pointer"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              onClick={() => {
+                // Open the calendar programmatically
+                if (datePickerRef.current) {
+                  // @ts-ignore: access private method for opening
+                  datePickerRef.current.setOpen(true);
+                }
+              }}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
             <DatePicker
+              ref={datePickerRef}
               selected={dob}
               onChange={date => {
                 setDob(date);
@@ -250,15 +270,24 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
               ${errors.country
                 ? "border-red-500 ring-red-500"
                 : countryFocused
-                  ? "border-vibe-purple-500 ring-vibe-purple-500"
-                  : "border-gray-700 focus:ring-vibe-purple-500 focus:border-transparent"
+                  ? "border-vibe-purple-500 ring-vibe-purple-500 ring-2"
+                  : "border-gray-700 focus:ring-2 focus:ring-vibe-purple-500 focus:border-transparent"
               }
             `}
             onClick={() => {
               document.querySelector<HTMLInputElement>('.country-select input')?.focus();
             }}
           >
-            <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 pointer-events-none" />
+            <Globe 
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 cursor-pointer" 
+              onClick={e => {
+                e.stopPropagation();
+                document.querySelector<HTMLInputElement>('.country-select input')?.focus();
+                setCountryFocused(true);
+                countrySelectRef.current?.focus();
+                countrySelectRef.current?.onMenuOpen?.();
+              }}
+            />
             <div className="absolute right-10 top-2 bottom-2 w-px bg-gray-700 z-10" />
             <svg
               className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10 cursor-pointer"
@@ -294,6 +323,7 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
               onFocus={() => {
                 setCountryFocused(true);
                 setDobFocused(false);
+                countrySelectRef.current?.onMenuOpen?.();
               }}
               onBlur={() => setCountryFocused(false)}
               styles={{
@@ -344,6 +374,9 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
                   marginLeft: 0,
                   width: "100%",
                   zIndex: 1000,
+                  maxHeiht: 250,
+                  overflowY: "auto",
+                  touchAction: "auto",
                 }),
                 option: (base, state) => ({
                   ...base,

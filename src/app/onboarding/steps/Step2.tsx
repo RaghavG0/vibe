@@ -40,9 +40,13 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
   languageSelectRef,
   currencySelectRef,
   dateFormatSelectRef,
+  colorThemeFocused,
   setColorThemeFocused,
+  languageFocused,
   setLanguageFocused,
+  currencyFocused,
   setCurrencyFocused,
+  dateFormatFocused,
   setDateFormatFocused,
   currencyOptions,
   languageMap,
@@ -81,11 +85,18 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
             border-gray-700 focus-within:ring-2 focus-within:ring-vibe-purple-500 focus-within:border-transparent
           `}
           onClick={() => {
-            colorThemeSelectRef.current?.focus();
-            colorThemeSelectRef.current?.onMenuOpen?.();
+            document.querySelector<HTMLInputElement>('.color-theme-select input')?.focus();
           }}
         >
-          <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 z-10 text-gray-400 pointer-events-none" />
+          <Sparkles
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 z-10 text-gray-400 cursor-pointer"
+            onClick={e => {
+              e.stopPropagation();
+              setColorThemeFocused(true);
+              colorThemeSelectRef.current?.focus();
+              colorThemeSelectRef.current?.onMenuOpen?.();
+            }}
+          />
           <div className="absolute right-10 top-2 bottom-2 w-px bg-gray-700 z-10" />
           <svg
             className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10 cursor-pointer"
@@ -95,6 +106,7 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
             viewBox="0 0 24 24"
             onClick={e => {
               e.stopPropagation();
+              setColorThemeFocused(true);
               colorThemeSelectRef.current?.focus();
               colorThemeSelectRef.current?.onMenuOpen?.();
             }}
@@ -104,6 +116,7 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
           <Select
             classNamePrefix="react-select"
             ref={colorThemeSelectRef}
+            closeMenuOnSelect={true}
             className="color-theme-select w-full h-12 pl-10 pr-10 bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
             options={[
               {
@@ -143,12 +156,11 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
               ),
             }}
             onChange={opt => handleInputChange("colorTheme", opt?.value || "")}
-            placeholder={
-              <span className="flex items-center">
-                <span>Select Theme</span>
-              </span>
-            }
-            onFocus={() => setColorThemeFocused(true)}
+            placeholder={<span className="flex items-center"><span>Select Theme</span></span>}
+            onFocus={() => {
+              setColorThemeFocused(true);
+              colorThemeSelectRef.current?.onMenuOpen?.();
+            }}
             onBlur={() => setColorThemeFocused(false)}
             styles={{
               control: base => ({
@@ -181,6 +193,8 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
               input: base => ({
                 ...base,
                 color: "#fff",
+                caretColor: "transparent",
+                pointerEvents: "none",
               }),
               indicatorsContainer: base => ({
                 ...base,
@@ -192,6 +206,9 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
                 color: "#fff",
                 left: 0,
                 zIndex: 1000,
+                maxHeight: 250,
+                overflowY: "auto",
+                touchAction: "auto",
               }),
               option: (base, state) => ({
                 ...base,
@@ -208,6 +225,7 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
           />
         </div>
       </div>
+
       {/* Language */}
       <div className="mb-7">
         <label className="text-base font-medium text-gray-300 block">Language</label>
@@ -216,11 +234,18 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
             border-gray-700 focus-within:ring-2 focus-within:ring-vibe-purple-500 focus-within:border-transparent
           `}
           onClick={() => {
-            languageSelectRef.current?.focus();
-            languageSelectRef.current?.onMenuOpen?.();
+            document.querySelector<HTMLInputElement>('.language-select input')?.focus();
           }}
         >
-          <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 pointer-events-none" />
+          <Globe
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 cursor-pointer"
+            onClick={e => {
+              e.stopPropagation();
+              setLanguageFocused(true);
+              languageSelectRef.current?.focus();
+              languageSelectRef.current?.onMenuOpen?.();
+            }}
+          />
           <div className="absolute right-10 top-2 bottom-2 w-px bg-gray-700 z-10" />
           <svg
             className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10 cursor-pointer"
@@ -230,6 +255,7 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
             viewBox="0 0 24 24"
             onClick={e => {
               e.stopPropagation();
+              setLanguageFocused(true);
               languageSelectRef.current?.focus();
               languageSelectRef.current?.onMenuOpen?.();
             }}
@@ -240,6 +266,7 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
             ref={languageSelectRef}
             classNamePrefix="react-select"
             className="language-select w-full h-12 pl-10 pr-10 bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
+            closeMenuOnSelect={true}
             options={[
               {
                 value: "en",
@@ -292,12 +319,11 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
                 <span>Select Language</span>
               </span>
             }
-            onFocus={() => setLanguageFocused(true)}
-            onBlur={() => setLanguageFocused(false)}
-            components={{
-              IndicatorSeparator: () => null,
-              DropdownIndicator: () => null,
+            onFocus={() => {
+              setLanguageFocused(true);
+              languageSelectRef.current?.onMenuOpen?.();
             }}
+            onBlur={() => setLanguageFocused(false)}
             styles={{
               control: base => ({
                 ...base,
@@ -329,6 +355,8 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
               input: base => ({
                 ...base,
                 color: "#fff",
+                caretColor: "transparent",
+                pointerEvents: "none",
               }),
               indicatorsContainer: base => ({
                 ...base,
@@ -340,6 +368,9 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
                 color: "#fff",
                 left: 0,
                 zIndex: 1000,
+                maxHeight: 250,
+                overflowY: "auto",
+                touchAction: "auto",
               }),
               option: (base, state) => ({
                 ...base,
@@ -356,6 +387,7 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
           />
         </div>
       </div>
+
       {/* Currency */}
       <div className="mb-7">
         <label className="text-base font-medium text-gray-300 block">Currency</label>
@@ -364,11 +396,18 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
             border-gray-700 focus-within:ring-2 focus-within:ring-vibe-purple-500 focus-within:border-transparent
           `}
           onClick={() => {
-            currencySelectRef.current?.focus();
-            currencySelectRef.current?.onMenuOpen?.();
+            document.querySelector<HTMLInputElement>('.currency-select input')?.focus();
           }}
         >
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 pointer-events-none">
+          <span
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 cursor-pointer"
+            onClick={e => {
+              e.stopPropagation();
+              setCurrencyFocused(true);
+              currencySelectRef.current?.focus();
+              currencySelectRef.current?.onMenuOpen?.();
+            }}
+          >
             {getCurrencySymbol(formData.currency) || "$"}
           </span>
           <div className="absolute right-10 top-2 bottom-2 w-px bg-gray-700 z-10" />
@@ -380,6 +419,7 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
             viewBox="0 0 24 24"
             onClick={e => {
               e.stopPropagation();
+              setCurrencyFocused(true);
               currencySelectRef.current?.focus();
               currencySelectRef.current?.onMenuOpen?.();
             }}
@@ -389,6 +429,7 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
           <Select
             classNamePrefix="react-select"
             ref={currencySelectRef}
+            closeMenuOnSelect={true}
             className="currency-select w-full h-12 pl-10 pr-10 bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
             options={currencyOptions.map(c => ({
               value: c.code,
@@ -421,10 +462,6 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
             }
             onFocus={() => setCurrencyFocused(true)}
             onBlur={() => setCurrencyFocused(false)}
-            components={{
-              IndicatorSeparator: () => null,
-              DropdownIndicator: () => null,
-            }}
             styles={{
               control: base => ({
                 ...base,
@@ -456,6 +493,7 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
               input: base => ({
                 ...base,
                 color: "#fff",
+                // DO NOT hide caret or pointer events for currency
               }),
               indicatorsContainer: base => ({
                 ...base,
@@ -467,6 +505,9 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
                 color: "#fff",
                 left: 0,
                 zIndex: 1000,
+                maxHeight: 250,
+                overflowY: "auto",
+                touchAction: "auto",
               }),
               option: (base, state) => ({
                 ...base,
@@ -483,6 +524,7 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
           />
         </div>
       </div>
+
       {/* Date Format */}
       <div className="mb-7">
         <label className="text-base font-medium text-gray-300 block">Date format</label>
@@ -491,11 +533,18 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
             border-gray-700 focus-within:ring-2 focus-within:ring-vibe-purple-500 focus-within:border-transparent
           `}
           onClick={() => {
-            dateFormatSelectRef.current?.focus();
-            dateFormatSelectRef.current?.onMenuOpen?.();
+            document.querySelector<HTMLInputElement>('.date-format-select input')?.focus();
           }}
         >
-          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 pointer-events-none" />
+          <Calendar
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 cursor-pointer"
+            onClick={e => {
+              e.stopPropagation();
+              setDateFormatFocused(true);
+              dateFormatSelectRef.current?.focus();
+              dateFormatSelectRef.current?.onMenuOpen?.();
+            }}
+          />
           <div className="absolute right-10 top-2 bottom-2 w-px bg-gray-700 z-10" />
           <svg
             className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10 cursor-pointer"
@@ -505,6 +554,7 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
             viewBox="0 0 24 24"
             onClick={e => {
               e.stopPropagation();
+              setDateFormatFocused(true);
               dateFormatSelectRef.current?.focus();
               dateFormatSelectRef.current?.onMenuOpen?.();
             }}
@@ -514,6 +564,7 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
           <Select
             classNamePrefix="react-select"
             ref={dateFormatSelectRef}
+            closeMenuOnSelect={true}
             className="date-format-select w-full h-12 pl-10 pr-10 bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
             options={[
               {
@@ -559,12 +610,11 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
               </span>
             }
             menuPlacement="top"
-            onFocus={() => setDateFormatFocused(true)}
-            onBlur={() => setDateFormatFocused(false)}
-            components={{
-              IndicatorSeparator: () => null,
-              DropdownIndicator: () => null,
+            onFocus={() => {
+              setDateFormatFocused(true);
+              dateFormatSelectRef.current?.onMenuOpen?.();
             }}
+            onBlur={() => setDateFormatFocused(false)}
             styles={{
               control: base => ({
                 ...base,
@@ -596,6 +646,8 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
               input: base => ({
                 ...base,
                 color: "#fff",
+                caretColor: "transparent",
+                pointerEvents: "none",
               }),
               indicatorsContainer: base => ({
                 ...base,
@@ -607,6 +659,9 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
                 color: "#fff",
                 left: 0,
                 zIndex: 1000,
+                maxHeight: 250,
+                overflowY: "auto",
+                touchAction: "auto",
               }),
               option: (base, state) => ({
                 ...base,

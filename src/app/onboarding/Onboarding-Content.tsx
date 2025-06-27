@@ -23,6 +23,7 @@ import {
   formatDate,
 } from "./utils";
 import type { SelectInstance, GroupBase } from "react-select";
+import DatePicker from "react-datepicker";
 
 type CountryOptionType = { value: string; label: string };
 type OptionType = { value: string; label: React.ReactNode };
@@ -59,6 +60,7 @@ export default function OnboardingContent() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dobWrapperRef = useRef<HTMLDivElement>(null);
   const countrySelectRef = useRef<SelectInstance<CountryOptionType, false> | null>(null);
+  const datePickerRef = useRef<DatePicker | null>(null);
   const colorThemeSelectRef = useRef<SelectInstance<OptionType, false, GroupBase<OptionType>> | null>(null);
   const languageSelectRef = useRef<SelectInstance<OptionType, false, GroupBase<OptionType>> | null>(null);
   const currencySelectRef = useRef<SelectInstance<OptionType, false, GroupBase<OptionType>> | null>(null);
@@ -236,6 +238,7 @@ export default function OnboardingContent() {
                   countrySelectRef={countrySelectRef}
                   countryFocused={countryFocus.focused}
                   setCountryFocused={countryFocus.setFocused}
+                  datePickerRef={datePickerRef}
                 />
               )}
               {currentStep === 2 && (

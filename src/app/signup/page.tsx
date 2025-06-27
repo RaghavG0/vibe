@@ -57,7 +57,12 @@ export default function SignUp() {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-    if (errors[name]) {
+    if (name === "password") {
+      const allRequirementsMet = passwordRequirements.every(req => req.regex.test(value));
+      if (allRequirementsMet && errors.password) {
+        setErrors((prev) => ({ ...prev, password: "" }));
+      }
+    } else if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
@@ -266,7 +271,6 @@ export default function SignUp() {
                     )}
                   </button>
                 </div>
-                {/* Password Strength Meter */}
                 {passwordMeterVisible && (
                   <>
                     <PasswordStrengthMeter password={formData.password} requirements={passwordRequirements} />
