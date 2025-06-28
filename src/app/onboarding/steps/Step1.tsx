@@ -1,5 +1,5 @@
 "use client";
-import React, { RefObject, useState } from "react";
+import React, { RefObject, useState, useRef } from "react";
 import Image from "next/image";
 import { User, Calendar, Camera, Globe, ArrowLeft, ArrowRight, ChevronDown } from "lucide-react";
 import DatePicker from "react-datepicker";
@@ -63,22 +63,73 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
   datePickerRef,
 }) => {
   // For country input and dropdown
-  const [countryInput, setCountryInput] = useState(formData.country || "");
+  const [countryInput, setCountryInput] = useState("");
   const [countryMenuOpen, setCountryMenuOpen] = useState(false);
-  const [countryHoveredIdx, setCountryHoveredIdx] = React.useState<number | null>(null);
+  const [countryHoveredIdx, setCountryHoveredIdx] = useState<number | null>(null);
+  const [isCountryTyping, setIsCountryTyping] = useState(false);
+  const countryInputRef = useRef<HTMLInputElement>(null);
 
-  // Filter countries as user types
-  const filteredCountries = countryOptions.filter(c =>
-    c.name.toLowerCase().includes(countryInput.toLowerCase())
-  );
+  // Show all countries if input is empty, otherwise filter
+  const filteredCountries = countryInput === ""
+    ? countryOptions
+    : countryOptions.filter(c =>
+        c.name.toLowerCase().includes(countryInput.toLowerCase())
+      );
 
-  // Keep input in sync with formData.country
+  // Get selected country for placeholder
+  const selectedCountry = countryOptions.find(c => c.name === formData.country);
+
+  // When formData.country changes (from parent), update input if not typing
   React.useEffect(() => {
-    setCountryInput(formData.country || "");
-  }, [formData.country]);
+    if (!isCountryTyping) {
+      setCountryInput("");
+    }
+  }, [formData.country, isCountryTyping]);
 
-  // Get flag for placeholder
-  const selectedCountry = countryOptions.find(c => c.name === countryInput) || countryOptions.find(c => c.name === formData.country);
+  // Handle input focus: open menu, clear input, show all options
+  const handleCountryFocus = () => {
+    setCountryFocused(true);
+    setCountryMenuOpen(true);
+    setCountryInput("");
+    setIsCountryTyping(false);
+    setDobFocused(false);
+  };
+
+  // Handle input click: open menu, clear input, show all options
+  const handleCountryClick = () => {
+    setCountryMenuOpen(true);
+    setCountryInput("");
+    setIsCountryTyping(false);
+  };
+
+  // Handle input blur: close menu, reset typing state
+  const handleCountryBlur = () => {
+    setTimeout(() => {
+      setCountryFocused(false);
+      setCountryMenuOpen(false);
+      setIsCountryTyping(false);
+      setCountryInput(""); // Reset input so selected country shows
+    }, 100);
+  };
+
+  // Handle input change: filter options, keep menu open, mark as typing
+  const handleCountryInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCountryInput(e.target.value);
+    setCountryMenuOpen(true);
+    setIsCountryTyping(true);
+    handleInputChange("country", e.target.value);
+  };
+
+  // Handle country select: set value, close menu, blur input, reset input
+  const handleCountrySelect = (c: { name: string; flag: string }) => {
+    setCountryInput(""); // Reset input so selected country shows
+    handleInputChange("country", c.name);
+    setCountryMenuOpen(false);
+    setCountryFocused(false);
+    setIsCountryTyping(false);
+    // Blur input to remove blinking cursor
+    countryInputRef.current?.blur();
+  };
 
   return (
     <div className="p-4 sm:p-8">
@@ -305,39 +356,36 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
               <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
               <div className="absolute right-10 top-2 bottom-2 w-px bg-gray-700 z-10" />
               <input
+                ref={countryInputRef}
                 type="text"
                 className="w-full h-12 pl-10 pr-10 bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
-                value={countryInput}
-                placeholder={selectedCountry ? `${selectedCountry.flag} Select Country` : "Select Country"}
-                onFocus={() => {
-                  setCountryFocused(true);
-                  setCountryMenuOpen(true);
-                  setDobFocused(false);
-                }}
-                onBlur={() => {
-                  setTimeout(() => {
-                    setCountryFocused(false);
-                    setCountryMenuOpen(false);
-                  }, 100);
-                }}
-                onChange={e => {
-                  setCountryInput(e.target.value);
-                  setCountryMenuOpen(true);
-                  handleInputChange("country", e.target.value);
-                }}
+                value={
+                  countryFocused || countryMenuOpen || isCountryTyping
+                    ? countryInput
+                    : selectedCountry
+                    ? `${selectedCountry.flag} ${selectedCountry.name}`
+                    : ""
+                }
+                placeholder="Select Country"
+                onFocus={handleCountryFocus}
+                onClick={handleCountryClick}
+                onBlur={handleCountryBlur}
+                onChange={handleCountryInputChange}
                 tabIndex={0}
                 autoComplete="off"
-                onKeyDown={e => {
-                  if (e.key === "Tab") {
-                    setCountryMenuOpen(true);
-                  }
-                }}
+                readOnly={false}
               />
               <ChevronDown
                 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10 cursor-pointer"
                 onMouseDown={e => {
                   e.preventDefault();
                   setCountryMenuOpen(v => !v);
+                  setCountryFocused(true);
+                  setCountryInput("");
+                  setIsCountryTyping(false);
+                  setTimeout(() => {
+                    countryInputRef.current?.focus();
+                  }, 0);
                 }}
               />
               {countryMenuOpen && (
@@ -377,10 +425,7 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
                         }}
                         onMouseDown={e => {
                           e.preventDefault();
-                          setCountryInput(c.name);
-                          handleInputChange("country", c.name);
-                          setCountryMenuOpen(false);
-                          setCountryFocused(false);
+                          handleCountrySelect(c);
                         }}
                         onMouseEnter={() => setCountryHoveredIdx(idx)}
                         onMouseLeave={() => setCountryHoveredIdx(null)}

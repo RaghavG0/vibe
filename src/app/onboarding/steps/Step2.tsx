@@ -499,7 +499,7 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
               }}
             />
             {currencyOpen && (
-              <ul className={dropdownMenuClass} style={{
+              <ul className={dropdownMenuClassUp} style={{
                 touchAction: "pan-y",
                 WebkitOverflowScrolling: "touch",
                 overscrollBehavior: "contain",
@@ -529,7 +529,7 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
                         handleInputChange("currency", opt.code);
                         setCurrencyOpen(false);
                         setCurrencyActiveIdx(null);
-                        currencyInputRef.current?.blur(); // <-- Blur input so cursor disappears
+                        currencyInputRef.current?.blur();
                       }}
                       onMouseEnter={() => setCurrencyActiveIdx(idx)}
                       onMouseLeave={() => setCurrencyActiveIdx(null)}
