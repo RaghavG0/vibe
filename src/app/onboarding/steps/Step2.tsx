@@ -81,12 +81,17 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
     "absolute bottom-full mb-2 w-full rounded-xl bg-[#23293a] border border-gray-700 shadow-2xl z-50 max-h-80 overflow-y-auto py-1 text-base focus:outline-none sm:text-sm";
 
   // Helper for dropdown item style
+  // Selected: purple, Focused/Hover: lighter blue, Default: gray
   function dropdownItemClass(isSelected: boolean, isActive: boolean) {
     return classNames(
       "cursor-pointer select-none relative py-2 pl-10 pr-4 flex items-center transition-colors",
-      (isSelected || isActive)
+      isSelected && isActive
+        ? "bg-vibe-purple-500 text-white" // If both selected and focused, keep selected color
+        : isSelected
         ? "bg-vibe-purple-500 text-white"
-        : "text-gray-200 hover:bg-vibe-purple-700 hover:text-white"
+        : isActive
+        ? "bg-blue-600/70 text-white"
+        : "text-gray-200"
     );
   }
 
@@ -105,18 +110,66 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
   const languageRef = useRef<HTMLDivElement>(null);
   const dateFormatRef = useRef<HTMLDivElement>(null);
 
-  // --- Open dropdown on focus (Tab) ---
+  // --- Set initial value for currency to INR (Indian Rupee) ---
+  useEffect(() => {
+    if (!formData.currency) {
+      const inrOption = currencyOptions.find(opt => opt.code === INR_CODE);
+      if (inrOption) {
+        handleInputChange("currency", INR_CODE);
+        setCurrencyInput(""); // keep input empty for placeholder
+      }
+    }
+    // eslint-disable-next-line
+  }, [currencyOptions]);
+
+  // --- Fix tabbing glitch: close currency dropdown on blur and clear input ---
+  function handleCurrencyBlur() {
+    setTimeout(() => {
+      setCurrencyOpen(false);
+      setCurrencyActiveIdx(null);
+      setCurrencyInput(""); // clear input so placeholder shows again
+    }, 100);
+  }
+
+  // --- Dropdown open/close and blur logic for all fields ---
+  // Color Theme
   function handleColorThemeFocus() {
-    setColorThemeOpen(true);
-    setColorThemeActiveIdx(null);
+    if (!colorThemeOpen) {
+      setColorThemeOpen(true);
+      setColorThemeActiveIdx(null);
+    }
   }
+  function handleColorThemeClick() {
+    if (!colorThemeOpen) {
+      setColorThemeOpen(true);
+      setColorThemeActiveIdx(null);
+    }
+  }
+  // Language
   function handleLanguageFocus() {
-    setLanguageOpen(true);
-    setLanguageActiveIdx(null);
+    if (!languageOpen) {
+      setLanguageOpen(true);
+      setLanguageActiveIdx(null);
+    }
   }
+  function handleLanguageClick() {
+    if (!languageOpen) {
+      setLanguageOpen(true);
+      setLanguageActiveIdx(null);
+    }
+  }
+  // Date Format
   function handleDateFormatFocus() {
-    setDateFormatOpen(true);
-    setDateFormatActiveIdx(null);
+    if (!dateFormatOpen) {
+      setDateFormatOpen(true);
+      setDateFormatActiveIdx(null);
+    }
+  }
+  function handleDateFormatClick() {
+    if (!dateFormatOpen) {
+      setDateFormatOpen(true);
+      setDateFormatActiveIdx(null);
+    }
   }
 
   // --- Keyboard navigation handlers for dropdowns ---
@@ -143,6 +196,7 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
       handleInputChange("colorTheme", opt.value);
       setColorThemeOpen(false);
       setColorThemeActiveIdx(null);
+      colorThemeRef.current?.blur();
       e.preventDefault();
     } else if (e.key === "Escape") {
       setColorThemeOpen(false);
@@ -172,6 +226,7 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
       handleInputChange("language", opt.value);
       setLanguageOpen(false);
       setLanguageActiveIdx(null);
+      languageRef.current?.blur();
       e.preventDefault();
     } else if (e.key === "Escape") {
       setLanguageOpen(false);
@@ -201,6 +256,7 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
       handleInputChange("dateFormat", opt.value);
       setDateFormatOpen(false);
       setDateFormatActiveIdx(null);
+      dateFormatRef.current?.blur();
       e.preventDefault();
     } else if (e.key === "Escape") {
       setDateFormatOpen(false);
@@ -227,10 +283,11 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
       e.preventDefault();
     } else if (e.key === "Enter" && currencyActiveIdx !== null) {
       const opt = filteredCurrencies[currencyActiveIdx];
-      setCurrencyInput(opt.name);
+      setCurrencyInput(""); // Clear input for next time
       handleInputChange("currency", opt.code);
       setCurrencyOpen(false);
       setCurrencyActiveIdx(null);
+      currencyInputRef.current?.blur();
       e.preventDefault();
     } else if (e.key === "Escape") {
       setCurrencyOpen(false);
@@ -240,27 +297,6 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
       setCurrencyOpen(false);
       setCurrencyActiveIdx(null);
     }
-  }
-
-  // --- Set initial value for currency to INR (Indian Rupee) ---
-  useEffect(() => {
-    if (!formData.currency) {
-      const inrOption = currencyOptions.find(opt => opt.code === INR_CODE);
-      if (inrOption) {
-        handleInputChange("currency", INR_CODE);
-        setCurrencyInput(""); // keep input empty for placeholder
-      }
-    }
-    // eslint-disable-next-line
-  }, [currencyOptions]);
-
-  // --- Fix tabbing glitch: close currency dropdown on blur and clear input ---
-  function handleCurrencyBlur() {
-    setTimeout(() => {
-      setCurrencyOpen(false);
-      setCurrencyActiveIdx(null);
-      setCurrencyInput(""); // clear input so placeholder shows again
-    }, 100);
   }
 
   return (
@@ -300,12 +336,9 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
                 : "border-gray-700 focus:ring-2 focus:ring-vibe-purple-500 focus:border-transparent"
             )}
             tabIndex={0}
-            onClick={() => {
-              setColorThemeOpen(v => !v);
-              setColorThemeActiveIdx(null);
-            }}
-            onBlur={() => setTimeout(() => setColorThemeOpen(false), 100)}
             onFocus={handleColorThemeFocus}
+            onClick={handleColorThemeClick}
+            onBlur={() => setTimeout(() => setColorThemeOpen(false), 100)}
             onKeyDown={handleColorThemeKeyDown}
           >
             <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 z-10 text-gray-400" />
@@ -338,8 +371,10 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
                       handleInputChange("colorTheme", opt.value);
                       setColorThemeOpen(false);
                       setColorThemeActiveIdx(null);
+                      colorThemeRef.current?.blur();
                     }}
                     onMouseEnter={() => setColorThemeActiveIdx(idx)}
+                    onMouseLeave={() => setColorThemeActiveIdx(null)}
                   >
                     <span className="flex items-center">{opt.icon}{opt.label}</span>
                     {formData.colorTheme === opt.value && (
@@ -363,12 +398,9 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
                 : "border-gray-700 focus:ring-2 focus:ring-vibe-purple-500 focus:border-transparent"
             )}
             tabIndex={0}
-            onClick={() => {
-              setLanguageOpen(v => !v);
-              setLanguageActiveIdx(null);
-            }}
-            onBlur={() => setTimeout(() => setLanguageOpen(false), 100)}
             onFocus={handleLanguageFocus}
+            onClick={handleLanguageClick}
+            onBlur={() => setTimeout(() => setLanguageOpen(false), 100)}
             onKeyDown={handleLanguageKeyDown}
           >
             <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
@@ -401,8 +433,10 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
                       handleInputChange("language", opt.value);
                       setLanguageOpen(false);
                       setLanguageActiveIdx(null);
+                      languageRef.current?.blur();
                     }}
                     onMouseEnter={() => setLanguageActiveIdx(idx)}
+                    onMouseLeave={() => setLanguageActiveIdx(null)}
                   >
                     <span className="flex items-center">{opt.icon}{opt.label}</span>
                     {formData.language === opt.value && (
@@ -433,9 +467,18 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
                   : "Select Currency"
               }
               onFocus={() => {
-                setCurrencyOpen(true);
-                setCurrencyInput(""); // Always clear input on focus to show all options
-                setCurrencyActiveIdx(null);
+                if (!currencyOpen) {
+                  setCurrencyOpen(true);
+                  setCurrencyInput("");
+                  setCurrencyActiveIdx(null);
+                }
+              }}
+              onClick={() => {
+                if (!currencyOpen) {
+                  setCurrencyOpen(true);
+                  setCurrencyInput("");
+                  setCurrencyActiveIdx(null);
+                }
               }}
               onBlur={handleCurrencyBlur}
               onChange={e => {
@@ -482,12 +525,14 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
                       }}
                       onMouseDown={e => {
                         e.preventDefault();
-                        setCurrencyInput(opt.name);
+                        setCurrencyInput(""); // Clear input for next time
                         handleInputChange("currency", opt.code);
                         setCurrencyOpen(false);
                         setCurrencyActiveIdx(null);
+                        currencyInputRef.current?.blur(); // <-- Blur input so cursor disappears
                       }}
                       onMouseEnter={() => setCurrencyActiveIdx(idx)}
+                      onMouseLeave={() => setCurrencyActiveIdx(null)}
                     >
                       <span className="flex items-center">{getCurrencyIcon(opt.code)}{opt.name} ({opt.code})</span>
                       {isSelected && (
@@ -512,12 +557,9 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
                 : "border-gray-700 focus:ring-2 focus:ring-vibe-purple-500 focus:border-transparent"
             )}
             tabIndex={0}
-            onClick={() => {
-              setDateFormatOpen(v => !v);
-              setDateFormatActiveIdx(null);
-            }}
-            onBlur={() => setTimeout(() => setDateFormatOpen(false), 100)}
             onFocus={handleDateFormatFocus}
+            onClick={handleDateFormatClick}
+            onBlur={() => setTimeout(() => setDateFormatOpen(false), 100)}
             onKeyDown={handleDateFormatKeyDown}
           >
             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
@@ -550,8 +592,10 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
                       handleInputChange("dateFormat", opt.value);
                       setDateFormatOpen(false);
                       setDateFormatActiveIdx(null);
+                      dateFormatRef.current?.blur();
                     }}
                     onMouseEnter={() => setDateFormatActiveIdx(idx)}
+                    onMouseLeave={() => setDateFormatActiveIdx(null)}
                   >
                     <span className="flex items-center">{opt.icon}{opt.label}</span>
                     {formData.dateFormat === opt.value && (

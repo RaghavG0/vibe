@@ -65,6 +65,7 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
   // For country input and dropdown
   const [countryInput, setCountryInput] = useState(formData.country || "");
   const [countryMenuOpen, setCountryMenuOpen] = useState(false);
+  const [countryHoveredIdx, setCountryHoveredIdx] = React.useState<number | null>(null);
 
   // Filter countries as user types
   const filteredCountries = countryOptions.filter(c =>
@@ -341,28 +342,30 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
               />
               {countryMenuOpen && (
                 <ul
-                className="absolute bottom-full mb-2 w-full rounded-xl bg-[#23293a] border border-gray-700 shadow-2xl z-50 max-h-80 overflow-y-auto py-1 text-base focus:outline-none sm:text-sm"
-                style={{
-                  touchAction: "pan-y",
-                  WebkitOverflowScrolling: "touch",
-                  overscrollBehavior: "contain",
-                  padding: 0,
-                }}
-              >
+                  className="absolute bottom-full mb-2 w-full rounded-xl bg-[#23293a] border border-gray-700 shadow-2xl z-50 max-h-80 overflow-y-auto py-1 text-base focus:outline-none sm:text-sm"
+                  style={{
+                    touchAction: "pan-y",
+                    WebkitOverflowScrolling: "touch",
+                    overscrollBehavior: "contain",
+                    padding: 0,
+                  }}
+                >
                   {filteredCountries.length === 0 && (
                     <li className="text-gray-400 px-4 py-2">No countries found</li>
                   )}
                   {filteredCountries.map((c, idx) => {
                     const isSelected = formData.country === c.name;
-                    const isActive = countryInput.trim().toLowerCase() === c.name.toLowerCase();
+                    const isActive = idx === countryHoveredIdx;
                     return (
                       <li
                         key={c.name}
                         className={classNames(
                           "cursor-pointer select-none relative py-2 pl-10 pr-4 flex items-center transition-colors",
-                          (isSelected || isActive)
+                          isSelected
                             ? "bg-vibe-purple-500 text-white"
-                            : "text-gray-200 hover:bg-vibe-purple-700 hover:text-white"
+                            : isActive
+                            ? "bg-blue-600/70 text-white"
+                            : "text-gray-200"
                         )}
                         style={{
                           borderRadius: idx === 0
@@ -370,7 +373,7 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
                             : idx === filteredCountries.length - 1
                             ? "0 0 0.75rem 0.75rem"
                             : undefined,
-                          margin: 0, // Remove gap between highlighted and menu
+                          margin: 0,
                         }}
                         onMouseDown={e => {
                           e.preventDefault();
@@ -379,6 +382,8 @@ const Step1PersonalInfo: React.FC<Step1PersonalInfoProps> = ({
                           setCountryMenuOpen(false);
                           setCountryFocused(false);
                         }}
+                        onMouseEnter={() => setCountryHoveredIdx(idx)}
+                        onMouseLeave={() => setCountryHoveredIdx(null)}
                       >
                         <span className="block truncate">{c.flag} {c.name}</span>
                         {isSelected && (
