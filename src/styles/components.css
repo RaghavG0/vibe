@@ -31,4 +31,13 @@
       linear-gradient(#fff 0 0);
     mask-composite: subtract;
   }
+  
+  /* Dashboard-specific styles */
+  .dashboard-sidebar-item {
+    @apply transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg;
+  }
+
+  .dashboard-card-hover {
+    @apply transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md;
+  }
 }

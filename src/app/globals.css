@@ -43,9 +43,64 @@
 .delay-400 { animation-delay: 0.4s; }
 .delay-500 { animation-delay: 0.5s; }
 
-/* === Scrollbar Styling === */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: var(--vibe-gray-100); }
-::-webkit-scrollbar-thumb { background: var(--vibe-purple-300); border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: var(--vibe-purple-400); }
-html { scroll-behavior: smooth; }
+/* === Custom Scrollbar Styles === */
+
+/* Hide scrollbars by default */
+::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+  background: transparent;
+}
+
+/* Show scrollbars on hover for webkit browsers */
+*:hover::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*:hover::-webkit-scrollbar-track {
+  background: var(--color-vibe-gray-100);
+}
+
+*:hover::-webkit-scrollbar-thumb {
+  background: var(--color-vibe-purple-300);
+  border-radius: 9999px;
+}
+
+*:hover::-webkit-scrollbar-thumb:hover {
+  background: var(--color-vibe-purple-400);
+}
+
+/* For Firefox - hide scrollbars completely */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Custom class for areas that should always show scrollbars (like modals) */
+.custom-scrollbar {
+  scrollbar-width: thin;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--color-vibe-gray-100);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-vibe-purple-300);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-vibe-purple-400);
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
