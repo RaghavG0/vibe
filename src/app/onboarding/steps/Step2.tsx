@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Sparkles, Globe, Calendar, ArrowLeft, ArrowRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/landing/button";
 import type { FormData, CurrencyOption } from "../type";
+import { useTheme } from "@/components/Dashboard/ThemeContext";
 
 type OptionType = { value: string; label: string; icon?: React.ReactNode };
 
@@ -58,6 +59,14 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
   const [languageOpen, setLanguageOpen] = useState(false);
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [dateFormatOpen, setDateFormatOpen] = useState(false);
+  const { setTheme } = useTheme();
+
+  useEffect(() => {
+    if (formData.colorTheme) {
+      setTheme(formData.colorTheme as "light" | "dark" | "system");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Active index for keyboard navigation in dropdowns
   const [colorThemeActiveIdx, setColorThemeActiveIdx] = useState<number | null>(null);
@@ -204,6 +213,14 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
       e.preventDefault();
     }
   }
+
+  const handleColorThemeSelect = (value: string) => {
+    handleInputChange("colorTheme", value);
+    setTheme(value as "light" | "dark" | "system"); // update app theme immediately
+    setColorThemeOpen(false);
+    setColorThemeActiveIdx(null);
+    colorThemeRef.current?.blur();
+  };
 
   // Language Dropdown Keyboard Navigation
   function handleLanguageKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
@@ -368,7 +385,7 @@ const Step2Preferences: React.FC<Step2PreferencesProps> = ({
                     }}
                     onMouseDown={e => {
                       e.preventDefault();
-                      handleInputChange("colorTheme", opt.value);
+                      handleColorThemeSelect(opt.value);
                       setColorThemeOpen(false);
                       setColorThemeActiveIdx(null);
                       colorThemeRef.current?.blur();

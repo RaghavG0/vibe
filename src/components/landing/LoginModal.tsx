@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { X, Eye, EyeOff, Lock, Mail, Info } from "lucide-react";
 import { Button } from "../landing/button";
 import Link from "next/link";
 
@@ -22,6 +23,8 @@ export function LoginModal({
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,11 +49,16 @@ export function LoginModal({
         return;
       }
       setTimeout(() => {
-        if (email === "demo@vibewealth.com" && password === "password123") {
+        if (
+          (email === "demo@vibewealth.com" && password === "password123") ||
+          (email === "dashboard@gmail.com" && password === "12345678")
+        ) {
           onClose();
-          alert("Login successful! (Demo)");
+          router.push("/dashboard"); // <-- Redirect to dashboard
         } else {
-          setError("Invalid email or password. Try demo@vibewealth.com / password123");
+          setError(
+            "Invalid email or password. Try demo@vibewealth.com / password123 or dashboard@gmail.com / 12345678"
+          );
         }
         setIsLoading(false);
       }, 1000);
@@ -111,6 +119,14 @@ export function LoginModal({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="bg-gray-900 rounded-2xl border border-gray-800 shadow-2xl overflow-hidden">
+              {/* Notice with demo credentials */}
+              <div className="flex items-center gap-2 bg-blue-900/40 border-b border-blue-800 px-6 py-3">
+                <Info className="w-5 h-5 text-blue-400" />
+                <span className="text-sm text-blue-200">
+                  <b>Demo login:</b> <span className="underline">dashboard@gmail.com</span> / <span className="underline">12345678</span>
+                  <span className="ml-2">— This will directly take you to the dashboard.</span>
+                </span>
+              </div>
               {/* Header */}
               <div className="flex items-center justify-between p-6 border-b border-gray-800">
                 <div className="flex items-center space-x-3">

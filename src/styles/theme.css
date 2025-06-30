@@ -109,7 +109,7 @@
   --dashboard-sidebar: rgb(249, 250, 251);
 }
 
-.dark {
+[data-theme="dark"] {
 
   /* Dark mode variables */
   --background: 222.2 84% 4.9%;
