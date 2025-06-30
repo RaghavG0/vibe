@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, Suspense } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -807,7 +807,7 @@ const NavigationMenu: React.FC = () => {
   );
 };
 
-export default function AIChat() {
+function AIChatInner() {
   const { actualTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
@@ -1183,4 +1183,14 @@ export default function AIChat() {
       />
     </div>
   );
-};
+}
+
+// --- End of AIChatInner ---
+
+export default function AIChatPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center">Loading chat...</div>}>
+      <AIChatInner />
+    </Suspense>
+  );
+}
