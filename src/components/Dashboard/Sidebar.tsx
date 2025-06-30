@@ -45,7 +45,7 @@ export const Sidebar: React.FC = () => {
           label: "Dashboard",
         },
         {
-          href: "/dashboard/transactions",
+          href: "/dashboard/transaction",
           icon: CreditCard,
           label: "Transactions",
         },

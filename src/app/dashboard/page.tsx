@@ -876,7 +876,7 @@ export default function Page() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => router.push("/dashboard/notifications")}
+                      onClick={() => router.push("/dashboard/Notification")}
                       className="w-full rounded-xl text-dashboard-text-muted hover:text-dashboard-text"
                     >
                       View All Notifications
