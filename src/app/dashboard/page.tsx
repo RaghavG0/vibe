@@ -262,6 +262,7 @@ const transactionCategories = [
   { value: "other", label: "Other", icon: MoreHorizontal },
 ];
 
+// --- StatsCard Component ---
 const StatsCard: React.FC<{
   title: string;
   value: string;
@@ -506,6 +507,7 @@ const StatsCard: React.FC<{
   );
 };
 
+// --- StockItem Component ---
 const StockItem: React.FC<{
   stock: {
     symbol: string;
@@ -563,6 +565,7 @@ const StockItem: React.FC<{
   );
 };
 
+// --- TransactionItem Component ---
 const TransactionItem: React.FC<{
   transaction: (typeof initialTransactions)[0];
   onDelete?: (id: string) => void;
@@ -619,6 +622,7 @@ const TransactionItem: React.FC<{
   </div>
 );
 
+// --- SavingsGoalItem Component ---
 const SavingsGoalItem: React.FC<{
   goal: (typeof savingsGoals)[0];
 }> = ({ goal }) => {
@@ -653,7 +657,8 @@ const SavingsGoalItem: React.FC<{
   );
 };
 
-export const Dashboard: React.FC = () => {
+// --- Main Page Component ---
+export default function Page() {
   const router = useRouter();
   const [transactions, setTransactions] = useState(initialTransactions);
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false);
@@ -745,9 +750,6 @@ export const Dashboard: React.FC = () => {
       ...prev,
       [cardType]: period,
     }));
-
-    // Here you would typically fetch new data based on the selected period
-    console.log(`Changed ${cardType} period to: ${period}`);
   };
 
   const handleChartPeriodChange = (chartType: string, period: string) => {
@@ -759,7 +761,6 @@ export const Dashboard: React.FC = () => {
         ...prev,
         [chartType]: period,
       }));
-      console.log(`Changed ${chartType} chart period to: ${period}`);
     }
   };
 
@@ -788,7 +789,6 @@ export const Dashboard: React.FC = () => {
       <div className="space-y-8 h-full">
         {/* Header with Theme Toggle and Logo */}
         <DashboardHeader pageName="Dashboard" />
-
         {/* Welcome Section with Notifications and Profile */}
         <div className="flex items-center justify-between">
           <div>
@@ -1578,6 +1578,4 @@ export const Dashboard: React.FC = () => {
       </div>
     </DashboardLayout>
   );
-};
-
-export default Dashboard;
+}
