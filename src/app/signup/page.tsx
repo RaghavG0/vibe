@@ -94,15 +94,48 @@ export default function SignUp() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+    const isValid = validateForm();
+    if (!isValid) return;
+
     setIsLoading(true);
 
-    setTimeout(() => {
-      const isValid = validateForm();
-      setIsLoading(false);
-      if (isValid) {
-        router.push("/onboarding?signup=success");
+    try {
+      // Check if email exists
+      const checkRes = await fetch("http://localhost:8000/auth/email-exists", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email }),
+      });
+
+      const checkData = await checkRes.json();
+
+      if (checkData.exists) {
+        setErrors({ email: "Email already registered" });
+        return;
       }
-    }, 400);
+
+      // Proceed to signup
+      const signupRes = await fetch("http://localhost:8000/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!signupRes.ok) {
+        throw new Error("Signup failed");
+      }
+
+      // Save email to localStorage for verification screen
+      localStorage.setItem("signup-email", formData.email);
+
+      // Navigate to email verification
+      router.push("/email-verification");
+    } catch (err) {
+      console.error(err);
+      setErrors({ email: "Something went wrong. Please try again." });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // --- Render ---

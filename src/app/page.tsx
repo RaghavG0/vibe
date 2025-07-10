@@ -19,6 +19,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
+    document.documentElement.setAttribute("data-theme", "light");
     // Auto-open login modal if flag is set in localStorage (e.g., after redirect)
     const shouldShow = localStorage.getItem("openLogin");
     if (shouldShow === "true") {
@@ -29,7 +30,7 @@ export default function Home() {
 
   // --- Render ---
   return (
-    <div className="min-h-screen bg-white w-screen">
+    <div data-theme="light" className="min-h-screen bg-white w-screen">
       {/* Fixed header */}
       <Header />
 

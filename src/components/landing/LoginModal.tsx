@@ -26,44 +26,79 @@ export function LoginModal({
 
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError("");
+  setIsLoading(true);
 
-    setTimeout(() => {
-      if (!email.trim()) {
-        setError("Email is required.");
-        setIsLoading(false);
-        return;
-      }
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        setError("Please enter a valid email address.");
-        setIsLoading(false);
-        return;
-      }
-      if (!password) {
-        setError("Password is required.");
-        setIsLoading(false);
-        return;
-      }
-      setTimeout(() => {
-        if (
-          (email === "demo@vibewealth.com" && password === "password123") ||
-          (email === "dashboard@gmail.com" && password === "12345678")
-        ) {
-          onClose();
-          router.push("/dashboard"); // <-- Redirect to dashboard
-        } else {
-          setError(
-            "Invalid email or password. Try demo@vibewealth.com / password123 or dashboard@gmail.com / 12345678"
-          );
-        }
-        setIsLoading(false);
-      }, 1000);
-    }, 300);
-  };
+  if (!email.trim()) {
+    setError("Email is required.");
+    setIsLoading(false);
+    return;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    setError("Please enter a valid email address.");
+    setIsLoading(false);
+    return;
+  }
+
+  if (!password) {
+    setError("Password is required.");
+    setIsLoading(false);
+    return;
+  }
+
+  // ✅ Demo login shortcut
+  if (email === "dashboard@gmail.com" && password === "12345678") {
+    localStorage.setItem("vibe-token", "demo-token");
+    localStorage.setItem("vibe-user", JSON.stringify({ email }));
+    onClose();
+    router.push("/dashboard");
+    return;
+  }
+
+  try {
+    // Check if email exists
+    const checkRes = await fetch("http://localhost:8000/auth/email-exists", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const checkData = await checkRes.json();
+
+    if (!checkRes.ok) throw new Error("Check failed");
+
+    if (!checkData.exists) {
+      setError("Email not registered. Please SignUp");
+      return;
+    }
+
+    // Email exists, try logging in
+    const loginRes = await fetch("http://localhost:8000/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_email: email, user_password: password }),
+    });
+    const loginData = await loginRes.json();
+
+    if (!loginRes.ok || !loginData.access_token) {
+      setError("Wrong credentials");
+      return;
+    }
+
+    localStorage.setItem("vibe-token", loginData.access_token);
+    localStorage.setItem("vibe-user", JSON.stringify(loginData.user));
+    onClose();
+    router.push("/dashboard");
+  } catch (err) {
+    console.error(err);
+    setError("Something went wrong. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleGoogleLogin = () => {
     alert("Google OAuth would be implemented here");
@@ -73,14 +108,12 @@ export function LoginModal({
     const handleKeydown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
-
     if (isOpen) {
       document.addEventListener("keydown", handleKeydown);
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
     }
-
     return () => {
       document.removeEventListener("keydown", handleKeydown);
       document.body.style.overflow = "unset";
@@ -106,10 +139,7 @@ export function LoginModal({
           role="dialog"
           aria-modal="true"
         >
-          {/* Backdrop */}
           <div className="absolute inset-0 bg-black/90 backdrop-blur-md" />
-
-          {/* Modal Content */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -119,14 +149,14 @@ export function LoginModal({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="bg-gray-900 rounded-2xl border border-gray-800 shadow-2xl overflow-hidden">
-              {/* Notice with demo credentials */}
               <div className="flex items-center gap-2 bg-blue-900/40 border-b border-blue-800 px-6 py-3">
                 <Info className="w-5 h-5 text-blue-400" />
                 <span className="text-sm text-blue-200">
-                  <b>Demo login:</b> <span className="underline">dashboard@gmail.com</span> / <span className="underline">12345678</span>
-                  <span className="ml-2">— This will directly take you to the dashboard.</span>
+                  <b>Demo login:</b> dashboard@gmail.com / 12345678 —
+                  Redirects to dashboard.
                 </span>
               </div>
+
               {/* Header */}
               <div className="flex items-center justify-between p-6 border-b border-gray-800">
                 <div className="flex items-center space-x-3">
@@ -140,17 +170,15 @@ export function LoginModal({
                 </div>
                 <button
                   onClick={onClose}
-                  aria-label="Close modal"
                   className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-800 transition-colors text-gray-400 hover:text-white cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* Form Section */}
+              {/* Form */}
               <div className="p-6">
                 <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-                  {/* Email */}
                   <div className="space-y-2">
                     <label htmlFor="email" className="text-sm font-medium text-gray-300">
                       Email
@@ -160,7 +188,6 @@ export function LoginModal({
                       <input
                         id="email"
                         type="email"
-                        name="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="you@example.com"
@@ -169,7 +196,6 @@ export function LoginModal({
                     </div>
                   </div>
 
-                  {/* Password */}
                   <div className="space-y-2">
                     <label htmlFor="password" className="text-sm font-medium text-gray-300">
                       Password
@@ -178,7 +204,6 @@ export function LoginModal({
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <input
                         id="password"
-                        name="password"
                         type={showPassword ? "text" : "password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -187,7 +212,6 @@ export function LoginModal({
                       />
                       <button
                         type="button"
-                        aria-label="Toggle password visibility"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white cursor-pointer"
                       >
@@ -196,7 +220,6 @@ export function LoginModal({
                     </div>
                   </div>
 
-                  {/* Error */}
                   {error && (
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
@@ -207,17 +230,12 @@ export function LoginModal({
                     </motion.div>
                   )}
 
-                  {/* Forgot Password */}
                   <div className="flex justify-end">
-                    <Link
-                      href="/forgot-password"
-                      className="text-sm text-vibe-purple-400 hover:text-vibe-purple-300 transition-colors"
-                    >
+                    <Link href="/forgot-password" className="text-sm text-vibe-purple-400 hover:text-vibe-purple-300">
                       Forgot Password?
                     </Link>
                   </div>
 
-                  {/* Sign In */}
                   <Button
                     type="submit"
                     disabled={isLoading}
@@ -233,14 +251,12 @@ export function LoginModal({
                     )}
                   </Button>
 
-                  {/* Divider */}
                   <div className="relative flex items-center">
                     <div className="flex-1 border-t border-gray-700" />
                     <span className="px-3 text-sm text-gray-400 bg-gray-900">or</span>
                     <div className="flex-1 border-t border-gray-700" />
                   </div>
 
-                  {/* Google Auth */}
                   <Button
                     type="button"
                     onClick={handleGoogleLogin}
@@ -252,17 +268,11 @@ export function LoginModal({
                   </Button>
                 </form>
 
-                {/* Sign Up CTA */}
-                <div className="mt-6 text-center">
-                  <p className="text-gray-400">
-                    Don&apos;t have an account?{" "}
-                    <button
-                      onClick={onSignUpClick}
-                      className="text-vibe-purple-400 hover:text-vibe-purple-300 font-medium cursor-pointer"
-                    >
-                      Sign Up
-                    </button>
-                  </p>
+                <div className="mt-6 text-center text-gray-400">
+                  Don&apos;t have an account?{" "}
+                  <button onClick={onSignUpClick} className="text-vibe-purple-400 hover:text-vibe-purple-300 font-medium cursor-pointer">
+                    Sign Up
+                  </button>
                 </div>
               </div>
             </div>
@@ -293,5 +303,5 @@ function GoogleIcon() {
         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
       />
     </svg>
-  )
+  );
 }

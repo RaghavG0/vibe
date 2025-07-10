@@ -1,116 +1,200 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { DashboardLayout } from "@/components/Dashboard/DashboardLayout";
-import { DashboardHeader } from "@/components/Dashboard/DashboardHeader";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calender";
-import {
-  Plus,
-  TrendingUp,
-  TrendingDown,
-  Search,
-  Filter,
-  Calendar,
-  MoreHorizontal,
-  Edit3,
-  Trash2,
-  DollarSign,
-  PieChart,
-  BarChart3,
-  Target,
-  AlertCircle,
-  TrendingUp as GrowthIcon,
-  Utensils,
-  Car,
-  ShoppingCart,
-  Receipt,
-  Film,
-  Heart,
-  Book,
-  Send,
-  Wallet,
-  Briefcase,
-  Home,
-  Smartphone,
-  Coffee,
-  Plane,
-  Music,
-  ChevronDown,
-  ArrowUpRight,
-  ArrowDownRight,
-  Paperclip,
-  Sparkles,
-  Brain,
-  Bell,
-  X,
-  CheckCircle,
-  Settings,
-} from "lucide-react";
-import { cn } from "../../../../lib/utils";
+/**
+ * Transaction Management Page - Refactored for better maintainability
+ * Handles transaction CRUD operations with localStorage integration
+ * TODO: Connect to backend API when available
+ */
 
-// Transaction types and categories
-interface Transaction {
-  id: string;
-  name: string;
-  amount: number;
-  date: string;
-  status: string;
-  type: "income" | "expense" | "transfer";
-  category: string;
-  description?: string;
-  account?: string;
-}
+import React, { useState, useEffect } from 'react';
+import { DashboardLayout } from '@/components/Dashboard/DashboardLayout';
+import { DashboardHeader } from '@/components/Dashboard/DashboardHeader';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useFinancialCalculations } from '../hooks/useLocalStorage';
+import { STORAGE_KEYS } from '../utils/localStorage';
+import { Transaction, BudgetAlert, SavingsGoal } from '../types';
+import { mockTransactions, mockBudgetAlerts, mockSavingsGoals } from '../data/mockData';
 
-// Budget Alert interface
-interface BudgetAlert {
-  id: string;
-  category: string;
-  limit: number;
-  period: "daily" | "weekly" | "monthly";
-  isActive: boolean;
-}
+// Import component sections
+import { TransactionStats } from '../components/transactions/TransactionStats';
+import { TransactionInsights } from '../components/transactions/TransactionInsights';
+import { CategoryBreakdown } from '../components/transactions/CategoryBreakdown';
+import { TransactionHistory } from '../components/transactions/TransactionHistory';
+import { TransactionDialogs } from '../components/transactions/TransactionDialogs';
+import { QuickActions } from '../components/transactions/QuickActions';
 
-// Savings Goal interface
-interface SavingsGoal {
-  id: string;
-  name: string;
-  target: number;
-  current: number;
-  deadline: string;
-  description?: string;
-  priority: "high" | "medium" | "low";
+/**
+ * Main Transaction Page Component
+ * Manages all transaction-related functionality
+ */
+export default function TransactionsPage() {
+  // Load data from localStorage with fallback to mock data
+  const [transactions, setTransactions] = useLocalStorage<Transaction[]>(
+    STORAGE_KEYS.TRANSACTIONS,
+    mockTransactions
+  );
+  
+  const [budgetAlerts, setBudgetAlerts] = useLocalStorage<BudgetAlert[]>(
+    STORAGE_KEYS.BUDGET_ALERTS,
+    mockBudgetAlerts
+  );
+  
+  const [savingsGoals, setSavingsGoals] = useLocalStorage<SavingsGoal[]>(
+    STORAGE_KEYS.SAVINGS_GOALS,
+    mockSavingsGoals
+  );
+
+  // Financial calculations
+  const { totalIncome, totalExpenses, totalBalance } = useFinancialCalculations(transactions);
+
+  // State management
+  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>(transactions);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState<'all' | 'income' | 'expense' | 'transfer'>('all');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [filterDateRange, setFilterDateRange] = useState<string>('month');
+
+  // Dialog states
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
+  const [isBudgetAlertOpen, setIsBudgetAlertOpen] = useState(false);
+  const [isSavingsGoalOpen, setIsSavingsGoalOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+
+  // Apply filters effect
+  useEffect(() => {
+    let filtered = transactions;
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (t) =>
+          t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          t.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          t.category.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Type filter
+    if (filterType !== 'all') {
+      filtered = filtered.filter((t) => t.type === filterType);
+    }
+
+    // Category filter
+    if (filterCategory !== 'all') {
+      filtered = filtered.filter((t) => t.category === filterCategory);
+    }
+
+    // Date filter - simplified for demo
+    // TODO: Implement proper date filtering logic
+
+    setFilteredTransactions(filtered);
+  }, [transactions, searchTerm, filterType, filterCategory, filterDateRange]);
+
+  return (
+    <DashboardLayout>
+      <div className="space-y-8 h-full">
+        {/* Header */}
+        <DashboardHeader pageName="Transactions" />
+
+        {/* Stats Section */}
+        <TransactionStats
+          totalBalance={totalBalance}
+          totalIncome={totalIncome}
+          totalExpenses={totalExpenses}
+          transactionCount={transactions.length}
+        />
+
+        {/* AI Insights */}
+        <TransactionInsights
+          transactions={transactions}
+          budgetAlerts={budgetAlerts}
+          onOpenAnalytics={() => setIsAnalyticsOpen(true)}
+        />
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* Category Breakdown */}
+          <div className="xl:col-span-2">
+            <CategoryBreakdown transactions={transactions} />
+          </div>
+
+          {/* Quick Actions */}
+          <div>
+            <QuickActions
+              onAddTransaction={() => setIsAddOpen(true)}
+              onOpenAnalytics={() => setIsAnalyticsOpen(true)}
+              onCreateBudgetAlert={() => setIsBudgetAlertOpen(true)}
+              onCreateSavingsGoal={() => setIsSavingsGoalOpen(true)}
+            />
+          </div>
+        </div>
+
+        {/* Transaction History */}
+        <TransactionHistory
+          transactions={filteredTransactions}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          filterType={filterType}
+          onFilterTypeChange={setFilterType}
+          filterCategory={filterCategory}
+          onFilterCategoryChange={setFilterCategory}
+          filterDateRange={filterDateRange}
+          onFilterDateRangeChange={setFilterDateRange}
+          onEditTransaction={(transaction) => {
+            setEditingTransaction(transaction);
+            setIsEditOpen(true);
+          }}
+          onDeleteTransaction={(id) => {
+            setTransactions(transactions.filter((t) => t.id !== id));
+          }}
+        />
+
+        {/* All Dialogs */}
+        <TransactionDialogs
+          // Add Transaction Dialog
+          isAddOpen={isAddOpen}
+          onAddOpenChange={setIsAddOpen}
+          onAddTransaction={(newTransaction) => {
+            setTransactions([newTransaction, ...transactions]);
+          }}
+          
+          // Edit Transaction Dialog
+          isEditOpen={isEditOpen}
+          onEditOpenChange={setIsEditOpen}
+          editingTransaction={editingTransaction}
+          onEditTransaction={(updatedTransaction) => {
+            setTransactions(
+              transactions.map((t) =>
+                t.id === updatedTransaction.id ? updatedTransaction : t
+              )
+            );
+            setEditingTransaction(null);
+          }}
+          
+          // Analytics Dialog
+          isAnalyticsOpen={isAnalyticsOpen}
+          onAnalyticsOpenChange={setIsAnalyticsOpen}
+          transactions={transactions}
+          
+          // Budget Alert Dialog
+          isBudgetAlertOpen={isBudgetAlertOpen}
+          onBudgetAlertOpenChange={setIsBudgetAlertOpen}
+          onCreateBudgetAlert={(newAlert) => {
+            setBudgetAlerts([...budgetAlerts, newAlert]);
+          }}
+          
+          // Savings Goal Dialog
+          isSavingsGoalOpen={isSavingsGoalOpen}
+          onSavingsGoalOpenChange={setIsSavingsGoalOpen}
+          onCreateSavingsGoal={(newGoal) => {
+            setSavingsGoals([...savingsGoals, newGoal]);
+          }}
+        />
+      </div>
+    </DashboardLayout>
+  );
 }
 
 // Mock initial transactions
