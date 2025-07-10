@@ -1,10 +1,9 @@
-import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 import path from "path";
 
 const nextConfig: NextConfig = {
   eslint: {
-    ignoreDuringBuilds: true, // ✅ Skip linting on Vercel build
+    ignoreDuringBuilds: true,
   },
 
   images: {
@@ -28,13 +27,3 @@ const nextConfig: NextConfig = {
     return config;
   },
 };
-
-export default withSentryConfig(nextConfig, {
-  org: "raghav-s9",
-  project: "javascript-nextjs",
-  silent: !process.env.CI,
-  widenClientFileUpload: true,
-  tunnelRoute: "/monitoring",
-  disableLogger: true,
-  automaticVercelMonitors: true,
-});
