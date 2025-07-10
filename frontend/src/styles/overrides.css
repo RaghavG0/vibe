@@ -1,0 +1,45 @@
+@import "tailwindcss";
+@import "./theme.css";
+
+/* === Third-party Overrides === */
+.custom-datepicker-input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+.datepicker-center-popper {
+  left: 50% !important;
+  transform: translateX(-50%) translateY(-100%) !important;
+  top: 0 !important;
+  bottom: auto !important;
+  margin-top: -12px !important;
+}
+.datepicker-center-popper .react-datepicker__triangle {
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  top: 100% !important;
+  margin-top: -1px !important;
+}
+.react-select__option--is-selected .text-gray-400,
+.react-select__option--is-selected .text-vibe-purple-400 {
+  color: #fff !important;
+}
+.language-select__option--is-selected .text-gray-400,
+.color-theme-select__option--is-selected .text-gray-400,
+.currency-select__option--is-selected .text-gray-400,
+.date-format-select__option--is-selected .text-gray-400 {
+  color: #fff !important;
+}
+
+.dark [data-radix-select-content] {
+  background-color: rgb(31 41 55);
+  border-color: rgb(75 85 99);
+}
+
+.dark [data-radix-select-item] {
+  color: rgb(243 244 246);
+}
+
+.dark [data-radix-select-item]:hover {
+  background-color: rgb(55 65 81);
+}

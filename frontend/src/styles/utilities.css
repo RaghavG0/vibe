@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+/* === Utilities Layer: Helpers & Animations === */
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .container { margin-left: auto; margin-right: auto; padding-left: 2rem; padding-right: 2rem; }
+  .animate-accordion-down { animation: accordion-down 0.2s ease-out; }
+  .animate-accordion-up { animation: accordion-up 0.2s ease-out; }
+  .animate-float { animation: float 6s ease-in-out infinite; }
+  .animate-slide-up { animation: slide-up 0.5s ease-out; }
+  .animate-fade-in { animation: fade-in 0.5s ease-out; }
+  .animate-bounce-slow { animation: bounce 3s ease-in-out infinite; }
+  .animate-pulse-slow { animation: pulse 4s ease-in-out infinite; }
+}

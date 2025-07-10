@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+@theme {
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Vibe Brand Colors */
+  --color-vibe-purple-50: #f8f4ff;
+  --color-vibe-purple-100: #f0e7ff;
+  --color-vibe-purple-200: #e3d4ff;
+  --color-vibe-purple-300: #d0b5ff;
+  --color-vibe-purple-400: #b888ff;
+  --color-vibe-purple-500: #9f55ff;
+  --color-vibe-purple-600: #8b2bff;
+  --color-vibe-purple-700: #7518eb;
+  --color-vibe-purple-800: #6315c4;
+  --color-vibe-purple-900: #52129e;
+
+  --color-vibe-blue-50: #f0f8ff;
+  --color-vibe-blue-100: #e0f1fe;
+  --color-vibe-blue-200: #bae5fd;
+  --color-vibe-blue-300: #7dd3fc;
+  --color-vibe-blue-400: #38bdf8;
+  --color-vibe-blue-500: #0ea5e9;
+  --color-vibe-blue-600: #0284c7;
+  --color-vibe-blue-700: #0369a1;
+  --color-vibe-blue-800: #075985;
+  --color-vibe-blue-900: #0c4a6e;
+
+  --color-vibe-mint-50: #f0fdf9;
+  --color-vibe-mint-100: #ccfbef;
+  --color-vibe-mint-200: #99f6e0;
+  --color-vibe-mint-300: #5eead4;
+  --color-vibe-mint-400: #2dd4bf;
+  --color-vibe-mint-500: #14b8a6;
+  --color-vibe-mint-600: #0d9488;
+  --color-vibe-mint-700: #0f766e;
+  --color-vibe-mint-800: #115e59;
+  --color-vibe-mint-900: #134e4a;
+
+  --color-vibe-gray-50: #f9fafb;
+  --color-vibe-gray-100: #f3f4f6;
+  --color-vibe-gray-200: #e5e7eb;
+  --color-vibe-gray-300: #d1d5db;
+  --color-vibe-gray-400: #9ca3af;
+  --color-vibe-gray-500: #6b7280;
+  --color-vibe-gray-600: #4b5563;
+  --color-vibe-gray-700: #374151;
+  --color-vibe-gray-800: #1f2937;
+  --color-vibe-gray-900: #111827;
+
+  /* Dashboard Variables */
+  --color-dashboard-bg: var(--dashboard-bg);
+  --color-dashboard-card: var(--dashboard-card);
+  --color-dashboard-border: var(--dashboard-border);
+  --color-dashboard-text: var(--dashboard-text);
+  --color-dashboard-text-muted: var(--dashboard-text-muted);
+  --color-dashboard-sidebar: var(--dashboard-sidebar);
+}
+
+/* Custom CSS Variables */
+:root {
+
+  /* Light mode variables */
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(222.2 84% 4.9%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(222.2 84% 4.9%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(222.2 84% 4.9%);
+  --primary: hsl(262 83% 58%);
+  --primary-foreground: hsl(210 40% 98%);
+  --secondary: hsl(210 40% 96%);
+  --secondary-foreground: hsl(222.2 84% 4.9%);
+  --muted: hsl(210 40% 96%);
+  --muted-foreground: hsl(215.4 16.3% 46.9%);
+  --accent: hsl(210 40% 96%);
+  --accent-foreground: hsl(222.2 84% 4.9%);
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(210 40% 98%);
+  --border: hsl(214.3 31.8% 91.4%);
+  --input: hsl(214.3 31.8% 91.4%);
+  --ring: hsl(262 83% 58%);
+
+  /* Dashboard Variables - Light Mode */
+  --dashboard-bg: rgb(255, 255, 255);
+  --dashboard-card: rgb(249, 250, 251);
+  --dashboard-border: rgb(229, 231, 235);
+  --dashboard-text: rgb(17, 24, 39);
+  --dashboard-text-muted: rgb(107, 114, 128);
+  --dashboard-sidebar: rgb(249, 250, 251);
+}
+
+[data-theme="dark"] {
+
+  /* Dark mode variables */
+  --background: hsl(222.2 84% 4.9%);
+  --foreground: hsl(210 40% 98%);
+  --card: hsl(222.2 84% 4.9%);
+  --card-foreground: hsl(210 40% 98%);
+  --popover: hsl(222.2 84% 4.9%);
+  --popover-foreground: hsl(210 40% 98%);
+  --primary: hsl(262 83% 58%);
+  --primary-foreground: hsl(210 40% 98%);
+  --secondary: hsl(217.2 32.6% 17.5%);
+  --secondary-foreground: hsl(210 40% 98%);
+  --muted: hsl(217.2 32.6% 17.5%);
+  --muted-foreground: hsl(215 20.2% 65.1%);
+  --accent: hsl(217.2 32.6% 17.5%);
+  --accent-foreground: hsl(210 40% 98%);
+  --destructive: hsl(0 62.8% 30.6%);
+  --destructive-foreground: hsl(210 40% 98%);
+  --border: hsl(217.2 32.6% 17.5%);
+  --input: hsl(217.2 32.6% 17.5%);
+  --ring: hsl(262 83% 58%);
+
+  /* Dashboard Variables - Dark Mode */
+  --dashboard-bg: rgb(11, 11, 11);
+  --dashboard-card: rgb(23, 23, 23);
+  --dashboard-border: rgb(39, 39, 42);
+  --dashboard-text: rgb(250, 250, 250);
+  --dashboard-text-muted: rgb(158, 158, 158);
+  --dashboard-sidebar: rgb(11, 11, 11);
+}
+
