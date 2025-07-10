@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
-import { Providers } from "./Providers"; // <-- import your new Providers component
+import { Providers } from "./Providers";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "VibeWealth",
@@ -41,6 +42,7 @@ export default function RootLayout({
         <Providers>
           <div className="w-full overflow-x-hidden">{children}</div>
         </Providers>
+        <Analytics />
       </body>
     </html>
   );
