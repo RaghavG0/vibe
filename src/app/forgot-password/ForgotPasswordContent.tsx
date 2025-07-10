@@ -217,6 +217,7 @@ export default function ForgotPassword() {
                 handlePasswordBlur={handlePasswordBlur}
                 onSubmit={handlePasswordReset}
                 onChange={handleInputChange}
+                onSuccess={() => setCurrentStep(4)}
             />
             )}
             {currentStep === 4 && (
