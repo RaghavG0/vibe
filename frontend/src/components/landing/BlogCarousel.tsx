@@ -7,20 +7,35 @@ import { BlogCard } from "@/components/landing/BlogCard";
 import { useCarousel } from "@/hooks/useCarousel";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { blogPosts } from "@/data/blogs";
+// CHANGED: Added useState and useEffect for hydration fix
+import { useState, useEffect } from "react";
 
 export function BlogCarousel() {
   const { width } = useWindowSize();
+  // CHANGED: State to safely determine if we are on the client
+  const [isClient, setIsClient] = useState(false);
 
-  // Determine number of items to show based on screen width
-  const itemsPerView =
-    width < 768 ? 1 : width < 1024 ? 2 : 3;
+  // CHANGED: This effect runs only on the client, after the initial render
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // CHANGED: itemsPerView calculation now safely handles server vs. client rendering
+  const itemsPerView = isClient ? (width < 768 ? 1 : width < 1024 ? 2 : 3) : 3;
+
+  // --- CLONING LOGIC ---
+  const clonedStart = blogPosts.slice(-itemsPerView);
+  const clonedEnd = blogPosts.slice(0, itemsPerView);
+  const extendedPosts = [...clonedStart, ...blogPosts, ...clonedEnd];
 
   const {
     currentIndex,
-    setCurrentIndex,
+    isTransitioning,
+    activeDotIndex,
     setIsAutoPlaying,
     nextSlide,
     prevSlide,
+    handleDotClick,
   } = useCarousel(blogPosts.length, itemsPerView);
 
   return (
@@ -29,7 +44,7 @@ export function BlogCarousel() {
       className="py-20 bg-gradient-to-b from-vibe-gray-50 to-white"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+        {/* Header - No Changes */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -45,10 +60,6 @@ export function BlogCarousel() {
             Money tips that don&apos;t{" "}
             <span className="text-vibe-purple-700">put you to sleep</span>
           </h2>
-          <p className="text-xl text-vibe-gray-600 max-w-3xl mx-auto">
-            Fresh perspectives on finance, written by Gen Z for Gen Z. No
-            corporate speak, just real advice.
-          </p>
         </motion.div>
 
         {/* Carousel */}
@@ -57,63 +68,63 @@ export function BlogCarousel() {
           onMouseEnter={() => setIsAutoPlaying(false)}
           onMouseLeave={() => setIsAutoPlaying(true)}
         >
-          {/* Navigation Arrows */}
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10 -ml-4">
+          {/* CHANGED: Arrows are now visible on all screen sizes */}
+          <div className="absolute left-2 top-1/2 -translate-y-1/2 z-10">
             <button
               onClick={prevSlide}
-              className="w-12 h-12 bg-white shadow-lg rounded-full flex items-center justify-center hover:bg-vibe-gray-50 transition-colors duration-200 border border-vibe-gray-200 cursor-pointer"
+              className="w-10 h-10 md:w-12 md:h-12 bg-white/80 backdrop-blur-sm shadow-lg rounded-full flex items-center justify-center hover:bg-vibe-gray-50 transition-colors duration-200 border border-vibe-gray-200 cursor-pointer"
             >
-              <ChevronLeft className="w-6 h-6 text-vibe-gray-600" />
+              <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-vibe-gray-600" />
             </button>
           </div>
-
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10 -mr-4">
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10">
             <button
               onClick={nextSlide}
-              className="w-12 h-12 bg-white shadow-lg rounded-full flex items-center justify-center hover:bg-vibe-gray-50 transition-colors duration-200 border border-vibe-gray-200 cursor-pointer"
+              className="w-10 h-10 md:w-12 md:h-12 bg-white/80 backdrop-blur-sm shadow-lg rounded-full flex items-center justify-center hover:bg-vibe-gray-50 transition-colors duration-200 border border-vibe-gray-200 cursor-pointer"
             >
-              <ChevronRight className="w-6 h-6 text-vibe-gray-600" />
+              <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-vibe-gray-600" />
             </button>
           </div>
 
           {/* Blog Cards */}
           <div className="overflow-hidden">
             <motion.div
-              className="flex transition-transform duration-500 ease-in-out"
+              className="flex"
               style={{
+                width: `${(100 * extendedPosts.length) / itemsPerView}%`,
                 transform: `translateX(-${
-                  currentIndex * (100 / itemsPerView)
+                  (currentIndex * 100) / extendedPosts.length
                 }%)`,
+                transition: isTransitioning
+                  ? "transform 500ms ease-in-out"
+                  : "none",
               }}
             >
-              {blogPosts.map((post, index) => (
-                <motion.article
-                  key={post.id}
-                  className="flex-shrink-0 w-full md:w-1/2 lg:w-1/3 px-4"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
+              {extendedPosts.map((post, index) => (
+                <article
+                  key={`${post.id}-${index}`}
+                  className="px-2 md:px-4"
+                  style={{ width: `${100 / extendedPosts.length}%` }}
                 >
                   <BlogCard post={post} />
-                </motion.article>
+                </article>
               ))}
             </motion.div>
           </div>
 
           {/* Dots Indicator */}
           <div className="flex justify-center space-x-2 mt-8">
-            {Array.from({
-              length: Math.ceil(blogPosts.length / itemsPerView),
-            }).map((_, index) => (
+            {blogPosts.map((_, index) => (
               <button
                 key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={`w-2 h-2 rounded-full transition-colors duration-200 ${
-                  Math.floor(currentIndex / itemsPerView) === index
+                onClick={() => handleDotClick(index)}
+                className={`w-2.5 h-2.5 rounded-full transition-colors duration-200 ${
+                  (activeDotIndex + blogPosts.length) % blogPosts.length ===
+                  index
                     ? "bg-vibe-purple-600"
-                    : "bg-vibe-gray-300"
+                    : "bg-vibe-gray-300 hover:bg-vibe-gray-400"
                 }`}
+                aria-label={`Go to slide ${index + 1}`}
               />
             ))}
           </div>

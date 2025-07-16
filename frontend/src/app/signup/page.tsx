@@ -100,36 +100,11 @@ export default function SignUp() {
     setIsLoading(true);
 
     try {
-      // Check if email exists
-      const checkRes = await fetch("http://localhost:8000/auth/email-exists", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: formData.email }),
-      });
-
-      const checkData = await checkRes.json();
-
-      if (checkData.exists) {
-        setErrors({ email: "Email already registered" });
-        return;
-      }
-
-      // Proceed to signup
-      const signupRes = await fetch("http://localhost:8000/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      if (!signupRes.ok) {
-        throw new Error("Signup failed");
-      }
-
-      // Save email to localStorage for verification screen
-      localStorage.setItem("signup-email", formData.email);
-
-      // Navigate to email verification
-      router.push("/email-verification");
+      // Demo: simulate success
+      setTimeout(() => {
+        localStorage.setItem("signup-email", formData.email);
+        router.push("/email-verification");
+      }, 1000);
     } catch (err) {
       console.error(err);
       setErrors({ email: "Something went wrong. Please try again." });

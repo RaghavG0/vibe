@@ -40,7 +40,12 @@ export default function Home() {
         <Features />
         <WhyUs />
         <BlogCarousel />
-        <FinalCTA />
+
+        {/* --- CHANGED: FinalCTA is now hidden on mobile --- */}
+        <div className="hidden md:block">
+          <FinalCTA />
+        </div>
+        
         <Footer />
       </main>
 

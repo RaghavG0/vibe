@@ -1,13 +1,14 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/Dashboard/ThemeContext";
-import { ArrowRight, Sun, Moon } from "lucide-react";
+import { ArrowRight, Sun, Moon, Menu } from "lucide-react";
 
 interface DashboardHeaderProps {
   pageName: string;
+  onMenuClick?: () => void; // Optional: callback for menu button
 }
 
-// Theme toggle button for dashboard header
+// Theme toggle button for dashboard header (hidden on mobile)
 const ThemeToggle: React.FC = () => {
   const { setTheme, theme } = useTheme();
 
@@ -23,7 +24,7 @@ const ThemeToggle: React.FC = () => {
       variant="ghost"
       size="sm"
       onClick={toggleTheme}
-      className="w-12 h-12 p-0 bg-dashboard-card border border-dashboard-border rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all shadow-sm hover:shadow-md"
+      className="w-12 h-12 p-0 bg-dashboard-card border border-dashboard-border rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all shadow-sm hover:shadow-md hidden sm:inline-flex"
       title={`Switch to ${isDark ? "light" : "dark"} mode`}
     >
       {isDark ? (
@@ -35,14 +36,28 @@ const ThemeToggle: React.FC = () => {
   );
 };
 
-
-// DashboardHeader displays theme toggle, breadcrumb, and logo
+// DashboardHeader displays theme toggle (desktop), menu (mobile), breadcrumb, and logo
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   pageName,
+  onMenuClick,
 }) => {
   return (
-    <div className="flex items-center justify-between">
-      <ThemeToggle />
+    <div className="flex items-center justify-between sticky top-0 z-30 bg-dashboard-bg px-4 py-2">
+      {/* Mobile: Menu button, Desktop: Theme toggle */}
+      <div>
+        {/* Menu button only on mobile */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onMenuClick}
+          className="w-12 h-12 p-0 rounded-2xl sm:hidden"
+          aria-label="Open menu"
+        >
+          <Menu className="w-6 h-6 text-dashboard-text" />
+        </Button>
+        {/* Theme toggle only on desktop */}
+        <ThemeToggle />
+      </div>
 
       <div className="flex items-center gap-2 text-sm">
         <span className="text-dashboard-text-muted">Home</span>
@@ -61,8 +76,8 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 };
 
 /*
-Advice:
-- Keep header minimal and focused on navigation and theme.
-- For more pages, consider making breadcrumb dynamic.
-- Logo can be replaced with your SVG or image for branding.
+- Theme toggle is hidden on mobile (sm:hidden).
+- Menu button is shown only on mobile (sm:hidden).
+- Header is sticky and stays at the top on mobile.
+- Pass an onMenuClick prop to handle menu opening.
 */

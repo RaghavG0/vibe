@@ -12,7 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-// Feature data – could be moved to @/data/features.ts for modularity
+// Feature data remains the same
 const features = [
   {
     icon: Target,
@@ -58,7 +58,7 @@ const features = [
   },
 ];
 
-// Framer Motion animation variants
+// Animation variants remain the same
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -82,7 +82,7 @@ const itemVariants = {
   },
 };
 
-// --- FeatureCard component for breaking up ---
+// FeatureCard component updated with responsive text
 function FeatureCard({
   icon: Icon,
   title,
@@ -98,24 +98,21 @@ function FeatureCard({
     <motion.div
       variants={itemVariants}
       whileHover={{ scale: 1.05 }}
-      className="group bg-white rounded-2xl p-8 shadow-lg border border-vibe-gray-100 hover:shadow-xl hover:border-vibe-purple-200 transition-all duration-300 relative overflow-hidden"
+      className="flex-shrink-0 w-4/5 sm:w-2/3 md:w-auto group bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-vibe-gray-100 hover:shadow-xl hover:border-vibe-purple-200 transition-all duration-300 relative overflow-hidden"
     >
-      {/* Hover background effect */}
       <div className="absolute inset-0 bg-gradient-to-br from-transparent to-vibe-gray-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
       <div className="relative z-10">
-        {/* Feature icon */}
         <div
-          className={`w-14 h-14 rounded-xl bg-gradient-to-r ${gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
+          className={`w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-r ${gradient} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}
         >
-          <Icon className="w-7 h-7 text-white" />
+          <Icon className="w-6 h-6 md:w-7 md:h-7 text-white" />
         </div>
-
-        {/* Feature content */}
-        <h3 className="text-xl font-bold text-vibe-gray-800 mb-3 group-hover:text-vibe-purple-700 transition-colors">
+        {/* CHANGED: Responsive font size for the card title */}
+        <h3 className="text-lg md:text-xl font-bold text-vibe-gray-800 mb-3 group-hover:text-vibe-purple-700 transition-colors">
           {title}
         </h3>
-        <p className="text-vibe-gray-600 leading-relaxed">{description}</p>
+        {/* CHANGED: Explicitly set base font size for the card description */}
+        <p className="text-base text-vibe-gray-600 leading-relaxed">{description}</p>
       </div>
     </motion.div>
   );
@@ -127,53 +124,53 @@ export function Features() {
   return (
     <section
       id="features"
-      className="py-20 bg-gradient-to-b from-white to-vibe-gray-50 overflow-x-hidden"
+      className="py-16 md:py-20 bg-gradient-to-b from-white to-vibe-gray-50 overflow-x-hidden"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-12 md:mb-16"
         >
-          <div className="inline-flex items-center px-4 py-2 rounded-full vibe-gradient/10 border border-vibe-purple-200 text-vibe-purple-700 text-sm font-medium mb-4">
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-vibe-purple-100 border border-vibe-purple-200 text-vibe-purple-700 text-sm font-medium mb-4">
             <Sparkles className="w-4 h-4 mr-2" />
             Why VibeWealth?
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
+          {/* CHANGED: Responsive font size for the main heading */}
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
             Everything you need to{" "}
             <span className="text-vibe-purple-700">master money</span>
           </h2>
-          <p className="text-xl text-vibe-gray-600 max-w-3xl mx-auto">
+          {/* CHANGED: Responsive font size for the paragraph */}
+          <p className="text-lg md:text-xl text-vibe-gray-600 max-w-3xl mx-auto">
             Built specifically for Gen Z with the features that actually matter.
             No boring spreadsheets, just smart tools that make finance fun.
           </p>
         </motion.div>
 
-        {/* Feature cards */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+          className="hide-scrollbar flex overflow-x-auto space-x-6 pb-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-8 md:space-x-0 md:pb-0"
         >
           {features.map((feature, index) => (
             <FeatureCard key={index} {...feature} />
           ))}
         </motion.div>
 
-        {/* CTA button */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="text-center mt-16"
+          className="text-center mt-12 md:mt-16"
         >
-          <p className="text-vibe-gray-600 mb-6">
+          {/* CHANGED: Explicitly set base font size for consistency */}
+          <p className="text-base text-vibe-gray-600 mb-6">
             Ready to experience the future of personal finance?
           </p>
           <button
@@ -185,5 +182,5 @@ export function Features() {
         </motion.div>
       </div>
     </section>
-  )
+  );
 }

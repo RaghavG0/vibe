@@ -17,7 +17,6 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // Enforce case-sensitive imports (especially important for Linux/Vercel)
   webpack: (config) => {
     config.resolve.symlinks = false;
     config.resolve.alias = {
@@ -27,3 +26,5 @@ const nextConfig: NextConfig = {
     return config;
   },
 };
+
+export default nextConfig;

@@ -11,7 +11,7 @@ import {
   Bell,
 } from "lucide-react";
 
-// Social links data
+// Data and child components remain the same
 const socialLinks = [
   {
     icon: Instagram,
@@ -30,7 +30,6 @@ const socialLinks = [
   },
 ];
 
-// --- Newsletter Form as a separate component ---
 function NewsletterForm({
   email,
   setEmail,
@@ -51,9 +50,9 @@ function NewsletterForm({
         e.preventDefault();
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-          setError(""); // clear first to force re-render
+          setError("");
           setShowToast(false);
-          setTimeout(() => setError("Please enter a valid email address."), 200); // <-- delay here
+          setTimeout(() => setError("Please enter a valid email address."), 200);
           return;
         }
         setError("");
@@ -92,7 +91,6 @@ function NewsletterForm({
   );
 }
 
-// --- Social Links as a separate component ---
 function SocialLinks() {
   return (
     <div className="flex justify-center space-x-4">
@@ -120,13 +118,16 @@ function SocialLinks() {
   );
 }
 
+
+// --- Main Footer Component ---
 export function Footer() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [showToast, setShowToast] = useState(false);
 
   return (
-    <footer className="bg-vibe-gray-900 text-white pt-20 pb-8 overflow-x-hidden">
+    // CHANGED: Reduced vertical padding on mobile
+    <footer className="bg-vibe-gray-900 text-white pt-16 md:pt-20 pb-8 overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Newsletter Section */}
         <motion.div
@@ -146,10 +147,12 @@ export function Footer() {
           )}
           <div className="grid lg:grid-cols-2 gap-8 items-center">
             <div>
-              <h3 className="text-2xl sm:text-3xl font-bold mb-4">
+              {/* CHANGED: Responsive font size for the heading */}
+              <h3 className="text-2xl md:text-3xl font-bold mb-3">
                 Stay in the <span className="text-vibe-purple-700">loop</span>
               </h3>
-              <p className="text-vibe-gray-400 text-lg">
+              {/* CHANGED: Responsive font size for the paragraph */}
+              <p className="text-base md:text-lg text-vibe-gray-400">
                 Get weekly money tips, exclusive content, and early access to
                 new features. No spam, just good vibes and better finances.
               </p>
@@ -176,9 +179,11 @@ export function Footer() {
             <div className="w-8 h-8 vibe-gradient rounded-lg flex items-center justify-center">
               <TrendingUp className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold">VibeWealth</span>
+            {/* CHANGED: Responsive font size for the brand name */}
+            <span className="text-lg md:text-xl font-bold">VibeWealth</span>
           </div>
-          <p className="text-vibe-gray-400 mb-6 max-w-sm mx-auto">
+          {/* CHANGED: Explicitly set base font size */}
+          <p className="text-base text-vibe-gray-400 mb-6 max-w-sm mx-auto">
             The finance app that actually gets Gen Z. Built by young
             entrepreneurs who understand your financial journey.
           </p>

@@ -17,12 +17,22 @@ export default function EmailVerification() {
   const [isResending, setIsResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
   const [email, setEmail] = useState("your email");
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("Email verified!");
+  const [successSubtext, setSuccessSubtext] = useState("Your email has been successfully verified.");
 
   useEffect(() => {
     const storedEmail = localStorage.getItem("signup-email");
     if (storedEmail) setEmail(storedEmail);
   }, []);
 
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
   const handleVerifyAndContinue = async () => {
     setIsVerifying(true);
     setVerificationError("");
@@ -34,7 +44,7 @@ export default function EmailVerification() {
 
       if (isVerified) {
         localStorage.setItem("email-verified", "true");
-        router.push("/onboarding/setup");
+        router.push("/onboarding");
       } else {
         setVerificationError(
           "Email not verified yet. Please check your email and click the verification link before continuing.",
@@ -48,12 +58,14 @@ export default function EmailVerification() {
   };
 
   const handleResendEmail = async () => {
+    if (resendCooldown > 0) return;
     setIsResending(true);
     setResendSuccess(false);
 
     try {
       await new Promise((res) => setTimeout(res, 1500));
       setResendSuccess(true);
+      setResendCooldown(60); // Start 60s cooldown
       setTimeout(() => setResendSuccess(false), 3000);
     } catch (err) {
       console.error("Resend failed:", err);
@@ -203,7 +215,18 @@ export default function EmailVerification() {
               <Button
                 onClick={handleVerifyAndContinue}
                 disabled={isVerifying}
-                className="w-full py-3 rounded-xl font-semibold bg-vibe-gradient hover:opacity-90 text-white transition-all duration-300"
+                className={`
+                  w-full py-3 rounded-xl font-semibold
+                  bg-gradient-to-r from-vibe-purple-600 via-vibe-blue-600 to-vibe-mint-500
+                  shadow-lg cursor-pointer
+                  text-white
+                  transition-all duration-300
+                  hover:from-vibe-purple-500 hover:via-vibe-blue-500 hover:to-vibe-mint-400
+                  hover:shadow-xl
+                  active:scale-95
+                  disabled:from-gray-700 disabled:to-gray-800 disabled:text-gray-400 disabled:cursor-not-allowed
+                  border-0
+                `}
               >
                 {isVerifying ? (
                   <div className="flex items-center justify-center space-x-2">
@@ -225,13 +248,18 @@ export default function EmailVerification() {
                 <Button
                   variant="outline"
                   onClick={handleResendEmail}
-                  disabled={isResending}
+                  disabled={isResending || resendCooldown > 0}
                   className="text-vibe-purple-400 border-vibe-purple-400 hover:bg-vibe-purple-400 hover:text-white transition-all duration-300"
                 >
                   {isResending ? (
                     <div className="flex items-center space-x-2">
                       <RefreshCw className="w-4 h-4 animate-spin" />
                       <span>Sending...</span>
+                    </div>
+                  ) : resendCooldown > 0 ? (
+                    <div className="flex items-center space-x-2">
+                      <RefreshCw className="w-4 h-4" />
+                      <span>Resend in {resendCooldown}s</span>
                     </div>
                   ) : (
                     <div className="flex items-center space-x-2">
