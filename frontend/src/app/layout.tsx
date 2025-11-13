@@ -5,8 +5,8 @@ import { Providers } from "./Providers";
 import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
-  title: "VibeWealth",
-  description: "Your Finance Dashboard",
+  title: "LiveMART - Your Trusted Marketplace",
+  description: "Connect with customers, retailers, and wholesalers in one marketplace",
 };
 
 export default function RootLayout({
